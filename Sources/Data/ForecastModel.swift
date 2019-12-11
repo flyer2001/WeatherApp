@@ -10,13 +10,14 @@ import Realm
 import RealmSwift
 
 class Forecast: Object, Decodable {
+
     @objc dynamic var cod: String?
-    var message: Int?
-    var cnt: Int?
+    var message: RealmOptional<Int>
+    var cnt: RealmOptional<Int>
     var list = List<DayForecast>()
-    var city: City?
+    @objc dynamic var city: City?
     
-    required init(cod: String, message: Int, cnt: Int) {
+    required init(cod: String, message: RealmOptional<Int>, cnt: RealmOptional<Int>) {
         self.cod = cod
         self.message = message
         self.cnt = cnt
@@ -25,23 +26,24 @@ class Forecast: Object, Decodable {
     
     required init() {
         cod = ""
-        message = 0
-        cnt = 0
+        message = RealmOptional(0)
+        cnt = RealmOptional(0)
         super.init()
     }
 }
 
 class City: Object, Decodable {
-    var id: Int?
+    
+    var id: RealmOptional<Int>
     @objc dynamic var name: String?
-    var coord: Coord?
+    @objc dynamic var coord: Coord?
     @objc dynamic var country: String?
-    var population: Int?
-    var timezone: Int?
-    var sunrise: Int?
-    var sunset: Int?
+    var population: RealmOptional<Int>
+    var timezone: RealmOptional<Int>
+    var sunrise: RealmOptional<Int>
+    var sunset: RealmOptional<Int>
 
-    required init(id: Int, name: String, country: String, population: Int, timezone: Int, sunrise: Int, sunset: Int) {
+    required init(id: RealmOptional<Int>, name: String, country: String, population: RealmOptional<Int>, timezone: RealmOptional<Int>, sunrise: RealmOptional<Int>, sunset: RealmOptional<Int>) {
         self.id = id
         self.name = name
         self.country = country
@@ -52,54 +54,44 @@ class City: Object, Decodable {
     }
     
     required init() {
-        id = 0
+        id = RealmOptional(0)
         name = ""
         country = ""
-        population = 0
-        timezone = 0
-        sunrise = 0
-        sunset = 0
+        population = RealmOptional(0)
+        timezone = RealmOptional(0)
+        sunrise = RealmOptional(0)
+        sunset = RealmOptional(0)
         super.init()
     }
 
 }
 
 class Coord: Object, Decodable {
-    var lat: Double?
-    var lon: Double?
+    var lat: RealmOptional<Double>
+    var lon: RealmOptional<Double>
     
-    required init(lat: Double, lon: Double) {
+    required init(lat: RealmOptional<Double>, lon: RealmOptional<Double>) {
         self.lat = lat
         self.lon = lon
         super.init()
     }
     
     required init() {
-        lat = 0.0
-        lon = 0.0
+        lat = RealmOptional(0.0)
+        lon = RealmOptional(0.0)
         super.init()
     }
 }
 
 class DayForecast: Object, Decodable {
-    private enum CodingKeys : String, CodingKey {
-        case dt
-        case main
-        case weather
-        case clouds
-        case wind
-        case sys
-        case dt_txt
-     }
     
     var dt: Int?
     
-    var main: Main?
+    @objc dynamic var main: Main?
     var weather = List<Weather>()
-    var clouds: Clouds?
-    var wind: Wind?
-    var sys: Sys?
-    
+    @objc dynamic var clouds: Clouds?
+    @objc dynamic var wind: Wind?
+    @objc dynamic var sys: Sys?
     @objc dynamic var dt_txt: String?
     
     required init(dt: Int, dt_txt: String) {
@@ -117,18 +109,19 @@ class DayForecast: Object, Decodable {
 }
 
 class Main: Object, Decodable {
-    var temp: Double?
-    var temp_min: Double?
-    var temp_max: Double?
-    var pressure: Double?
-    var sea_level: Double?
-    var grnd_level: Double?
-    var humidity: Double?
-    var temp_kf: Double?
+    var temp: RealmOptional<Double>
+    var temp_min: RealmOptional<Double>
+    var temp_max: RealmOptional<Double>
+    var pressure: RealmOptional<Int>
+    var sea_level: RealmOptional<Int>
+    var grnd_level: RealmOptional<Int>
+    var humidity: RealmOptional<Int>
+    var temp_kf: RealmOptional<Double>
 
-    required init(temp: Double, temp_min: Double, temp_max: Double, pressure: Double, sea_level: Double, grnd_level: Double, humidity: Double, temp_kf: Double) {
+    required init(temp: RealmOptional<Double>, temp_min: RealmOptional<Double>, temp_max: RealmOptional<Double>, pressure: RealmOptional<Int>, sea_level: RealmOptional<Int>, grnd_level: RealmOptional<Int>, humidity: RealmOptional<Int>, temp_kf: RealmOptional<Double>) {
         self.temp = temp
         self.temp_min = temp_min
+        self.temp_max = temp_max
         self.pressure = pressure
         self.sea_level = sea_level
         self.grnd_level = grnd_level
@@ -138,25 +131,33 @@ class Main: Object, Decodable {
     }
     
     required init() {
-        temp = 0.0
-        temp_min = 0.0
-        pressure = 0.0
-        sea_level = 0.0
-        grnd_level = 0.0
-        humidity = 0.0
-        temp_kf = 0.0
+        temp = RealmOptional(0.0)
+        temp_min = RealmOptional(0.0)
+        temp_max = RealmOptional(0.0)
+        pressure = RealmOptional(0)
+        sea_level = RealmOptional(0)
+        grnd_level = RealmOptional(0)
+        humidity = RealmOptional(0)
+        temp_kf = RealmOptional(0.0)
         super.init()
     }
     
 }
 
 class Weather: Object, Decodable {
-    var id: Int?
+    private enum CodingKeys : String, CodingKey {
+        case id
+        case main
+        case desc = "description"
+        case icon
+    }
+
+    var id: RealmOptional<Int>
     @objc dynamic var main: String?
     @objc dynamic var desc: String?
     @objc dynamic var icon: String?
 
-    required init(id: Int, main: String, desc: String, icon: String) {
+    required init(id: RealmOptional<Int>, main: String, desc: String, icon: String) {
         self.id = id
         self.main = main
         self.desc = desc
@@ -165,7 +166,7 @@ class Weather: Object, Decodable {
     }
     
     required init() {
-        id = 0
+        id = RealmOptional(0)
         main = ""
         desc = ""
         icon = ""
@@ -175,32 +176,32 @@ class Weather: Object, Decodable {
 }
 
 class Clouds: Object, Decodable {
-    var all: Int?
+    var all: RealmOptional<Int>
     
-    required init(all: Int) {
+    required init(all: RealmOptional<Int>) {
         self.all = all
         super.init()
     }
     
     required init() {
-        all = 0
+        all = RealmOptional(0)
         super.init()
     }
 }
 
 class Wind: Object, Decodable {
-    var speed: Double?
-    var deg: Int?
+    var speed: RealmOptional<Double>
+    var deg: RealmOptional<Int>
     
-    required init(speed: Double, deg: Int) {
+    required init(speed: RealmOptional<Double>, deg: RealmOptional<Int>) {
         self.deg = deg
         self.speed = speed
         super.init()
     }
     
     required init() {
-        deg = 0
-        speed = 0.0
+        deg = RealmOptional(0)
+        speed = RealmOptional(0.0)
         super.init()
     }
 }

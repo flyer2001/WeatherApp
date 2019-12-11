@@ -15,14 +15,26 @@ final public class APIServices {
     
     private let keyAPI = "c21154f65ac934ec1c3af7b754337205" // ключ, полученный на сайте owm
     private let  parsingMode = "json"
-    private let domain = "https://api.openweathermap.org/data/2.5/forecast?"
+    enum Domain {
+        case domainCurrentWeather
+        case domainForecast
+        
+        var address: String {
+            switch self {
+            case .domainCurrentWeather:
+                return "https://api.openweathermap.org/data/2.5/weather?"
+            case .domainForecast:
+                return "https://api.openweathermap.org/data/2.5/forecast?"
+            }
+        }
+    }
     
-    public func getObject<T:Decodable>(
-        cityName: String,
+    func getObject<T:Decodable>(
+        cityName: String, //FIXME: если название города из двух слов
+        domain: Domain,
         handler: @escaping (_ object: T?, _ error: Error?) -> Void) {
        
-        let resultURL = "\(domain)q=\(cityName)&mode=\(parsingMode)&APPID=\(keyAPI)"
-        print(resultURL)
+        let resultURL = "\(domain.address)q=\(cityName)&mode=\(parsingMode)&APPID=\(keyAPI)"  //FIXME: сделать красивый конструктор URL со всеми параметрами
         request(resultURL).responseData(){ response in
             response.result.withValue { data in
                     do {
