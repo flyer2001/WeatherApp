@@ -31,6 +31,7 @@ class ViewController: UIViewController {
         currentTemperatureLabel.isHidden = true
         forecastTableView.isHidden = true
         forecastNoticeLabel.isHidden = true
+        
         //получаем данные из базы Realm
         if let cacheRealmDB = DataBase.shared.realm.objects(Forecast.self).last {
             daysForecast = Array(cacheRealmDB.list)
