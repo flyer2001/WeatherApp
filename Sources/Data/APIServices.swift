@@ -30,12 +30,12 @@ final public class APIServices {
     }
     
     func getObject<T:Decodable>(
-        cityName: String, //FIXME: если название города из двух слов
+        cityName: String,
         domain: Domain,
         handler: @escaping (_ object: T?, _ error: Error?) -> Void) {
-       
-        let resultURL = "\(domain.address)q=\(cityName)&mode=\(parsingMode)&APPID=\(keyAPI)"  //FIXME: сделать красивый конструктор URL со всеми параметрами
-        request(resultURL).responseData(){ response in
+        let citiNameWithoutSpaces = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        let resultURL = "\(domain.address)q=\(citiNameWithoutSpaces!)&mode=\(parsingMode)&APPID=\(keyAPI)"  //FIXME: сделать красивый конструктор URL со всеми параметрами
+            request(resultURL).responseData(){ response in
             response.result.withValue { data in
                     do {
                         let result = try JSONDecoder.init().decode(T.self, from: data)
