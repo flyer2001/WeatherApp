@@ -52,7 +52,7 @@ class DataBase {
             inMemoryIdentifier: nil,
             encryptionKey: nil,
             readOnly: false,
-            schemaVersion: 3,
+            schemaVersion: 5,
             migrationBlock: nil,
             deleteRealmIfMigrationNeeded: false,
             objectTypes: nil)

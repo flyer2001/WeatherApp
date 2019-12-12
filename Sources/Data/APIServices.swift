@@ -33,10 +33,11 @@ final public class APIServices {
         cityName: String,
         domain: Domain,
         handler: @escaping (_ object: T?, _ error: Error?) -> Void) {
-        let citiNameWithoutSpaces = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        let resultURL = "\(domain.address)q=\(citiNameWithoutSpaces!)&mode=\(parsingMode)&APPID=\(keyAPI)"  //FIXME: сделать красивый конструктор URL со всеми параметрами
+            let cityNameWithoutSpaces = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+            let resultURL = "\(domain.address)q=\(cityNameWithoutSpaces!)&mode=\(parsingMode)&APPID=\(keyAPI)"
             request(resultURL).responseData(){ response in
-            response.result.withValue { data in
+                
+                response.result.withValue { data in
                     do {
                         let result = try JSONDecoder.init().decode(T.self, from: data)
                         handler(result, nil)
