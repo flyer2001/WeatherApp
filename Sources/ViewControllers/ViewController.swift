@@ -31,6 +31,7 @@ class ViewController: UIViewController {
         currentTemperatureLabel.isHidden = true
         forecastTableView.isHidden = true
         forecastNoticeLabel.isHidden = true
+        weatherIconImageView.isHidden = true
         
         //получаем данные из базы Realm
         if let cacheRealmDB = DataBase.shared.realm.objects(Forecast.self).last {
@@ -42,24 +43,43 @@ class ViewController: UIViewController {
 
     
     @IBAction func getForecastButton(_ sender: Any) {
-        //FIXME: выдать ошибку если не правильно введен город или нет ответа от сервера
+        weatherInCityLabel.isHidden = true
+        currentTemperatureLabel.isHidden = true
+        forecastTableView.isHidden = true
+        forecastNoticeLabel.isHidden = true
+        weatherIconImageView.isHidden = true
+        
+        //FIXME: выдать ошибку если, если нет ответа от сервера
         //FIXME: реализовать загрузку из кеша, причем загрузить в ту же таблицы последние запросы, дать возможность пользователю выбрать нужный город из запроса
         //FIXME: при старте сразу загрузить из кеша последний запрос
         
         if let city = cityTextField.text {
             APIServices.shared.getObject(cityName: city, domain: .domainForecast){
                 [weak self](result: Forecast?, error: Error?) in
-                    if let error = error {
-                        print("\(error)")
+                    if let error = error {                        
+                        //print("\(error)")
                     } else if let result = result {
                         //print("\(result)")
                         self?.updateForecast(from: result)
                     }
             }
+            
             APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
                 [weak self](result: CurrentWeather?, error: Error?) in
                     if let error = error {
-                        print("\(error)")
+                        //print("\(error)")
+                        
+                        //повторный запрос к серверу, чтобы получить нормальный код ошибки
+                        APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
+                            [weak self](result: CurrentWeatherError?, error: Error?) in
+                                if let error = error {
+                                    //print("\(error)")
+                                } else if let result = result {
+                                    //print("\(result)")
+                                    self?.sendCurrentWeatherError(from: result)
+                                }
+                        }
+                        
                     } else if let result = result {
                         //print("\(result)")
                         self?.updateCurrentWeather(from: result)
@@ -68,12 +88,18 @@ class ViewController: UIViewController {
         }
     }
     
+    private func sendCurrentWeatherError(from result: CurrentWeatherError){
+        if let message = result.message {
+            weatherInCityLabel.isHidden = false
+            weatherInCityLabel.text = message + " try again"
+        }
+        
+    }
     
     private func updateForecast(from result: Forecast){
         forecast = result
         forecastTableView.isHidden = false
         forecastNoticeLabel.isHidden = false
-        
         
         // получим массив и отфильтруем по полю dt_txt, чтобы оставить элементы, содержащие в каждом днем отметку 12:00:))
         let convertForecastListArray = Array(forecast.list)
@@ -108,10 +134,11 @@ class ViewController: UIViewController {
         
         DataBase.shared.realm.beginWrite()
         DataBase.shared.realm.add(result)
-        //print(DataBase.shared.realm.configuration.fileURL) // подсмотреть путь до базы
         try! DataBase.shared.realm.commitWrite()
         
     }
+    
+    
     
     private func convertKelvToCelsius (_ temp: RealmOptional<Double>?) -> Int? {
         guard let tempValue = temp?.value else {return nil}
