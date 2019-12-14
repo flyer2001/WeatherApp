@@ -8,13 +8,18 @@
 
 import UIKit
 import RealmSwift
-
+import Alamofire
+import iOSDropDown
 
 class ViewController: UIViewController {
+    //FIX: пофиксить констрейнты
+    
     
     var forecast = Forecast()
     var currentWeather = CurrentWeather()
     var daysForecast = [DayForecast]()
+    
+    var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
     
     let REUSE_ID = "cell"
     
@@ -25,6 +30,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var forecastTableView: UITableView!
     @IBOutlet weak var weatherIconImageView: UIImageView!
     
+    @IBOutlet weak var dropDownMenuOfSavedSearch: DropDown!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         weatherInCityLabel.isHidden = true
@@ -32,6 +40,12 @@ class ViewController: UIViewController {
         forecastTableView.isHidden = true
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
+        
+        dropDownMenuOfSavedSearch.text = "Choose"
+        dropDownMenuOfSavedSearch.isSearchEnable = false
+        dropDownMenuOfSavedSearch.optionArray = ["1", "2", "3", "4", "5"]
+        //Проверяем есть ли интернет и в случае если нет запускаем Offline вариант с загрузкой из кеша
+        checkOfflineMode()
         
         //получаем данные из базы Realm
         if let cacheRealmDB = DataBase.shared.realm.objects(Forecast.self).last {
@@ -49,44 +63,60 @@ class ViewController: UIViewController {
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
         
-        //FIXME: выдать ошибку если, если нет ответа от сервера
-        //FIXME: реализовать загрузку из кеша, причем загрузить в ту же таблицы последние запросы, дать возможность пользователю выбрать нужный город из запроса
-        //FIXME: при старте сразу загрузить из кеша последний запрос
+        //Если поле нажатия кнопки нет Интернета, загрузить Offline Mode
+        checkOfflineMode()
         
-        if let city = cityTextField.text {
-            APIServices.shared.getObject(cityName: city, domain: .domainForecast){
-                [weak self](result: Forecast?, error: Error?) in
-                    if let error = error {                        
-                        //print("\(error)")
-                    } else if let result = result {
-                        //print("\(result)")
-                        self?.updateForecast(from: result)
-                    }
-            }
-            
-            APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
-                [weak self](result: CurrentWeather?, error: Error?) in
-                    if let error = error {
-                        //print("\(error)")
-                        
-                        //повторный запрос к серверу, чтобы получить нормальный код ошибки
-                        APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
-                            [weak self](result: CurrentWeatherError?, error: Error?) in
-                                if let error = error {
-                                    //print("\(error)")
-                                } else if let result = result {
-                                    //print("\(result)")
-                                    self?.sendCurrentWeatherError(from: result)
-                                }
+        if APIServices.shared.checkInternetConnection() == false {
+            print("NO INTERNET")
+        } else {
+            if let city = cityTextField.text {
+                APIServices.shared.getObject(cityName: city, domain: .domainForecast){
+                    [weak self](result: Forecast?, error: Error?) in
+                        if let error = error {
+                            //print("\(error)")
+                        } else if let result = result {
+                            //print("\(result)")
+                            self?.updateForecast(from: result)
                         }
-                        
-                    } else if let result = result {
-                        //print("\(result)")
-                        self?.updateCurrentWeather(from: result)
-                    }
+                }
+                
+                APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
+                    [weak self](result: CurrentWeather?, error: Error?) in
+                        if let error = error {
+                            //print("\(error)")
+                            
+                            //повторный запрос к серверу, чтобы получить нормальный код ошибки
+                            APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
+                                [weak self](result: CurrentWeatherError?, error: Error?) in
+                                    if let error = error {
+                                        //print("\(error)")
+                                    } else if let result = result {
+                                        //print("\(result)")
+                                        self?.sendCurrentWeatherError(from: result)
+                                    }
+                            }
+                            
+                        } else if let result = result {
+                            //print("\(result)")
+                            self?.updateCurrentWeather(from: result)
+                        }
+                }
             }
         }
+        
+        //FIXME: реализовать загрузку из кеша, причем загрузить в ту же таблицы последние запросы, дать возможность пользователю выбрать нужный город из запроса
+        //FIXME: при старте сразу загрузить из кеша последний запрос, отфильтрованный по дням
+        
     }
+    
+    private func checkOfflineMode(){
+        if APIServices.shared.checkInternetConnection() == false {
+            print("NO INTERNET")
+            weatherInCityLabel.isHidden = false
+            weatherInCityLabel.text = "Check your internet connection"
+        }
+    }
+
     
     private func sendCurrentWeatherError(from result: CurrentWeatherError){
         if let message = result.message {
@@ -98,19 +128,47 @@ class ViewController: UIViewController {
     
     private func updateForecast(from result: Forecast){
         forecast = result
+        DataBase.shared.realm.beginWrite()
+        var savedObject = IndexForecast()
+        
+        //Удаляем предыдущее значение города, если есть
+        
+        if let cityFromJSON = forecast.city?.name {
+            savedObject = IndexForecast(city: cityFromJSON, forecast: forecast)
+            
+            var cacheRealm = Array(DataBase.shared.realm.objects(IndexForecast.self))
+            cacheRealm = cacheRealm.filter{$0.city != cityFromJSON}
+            
+            DataBase.shared.realm.deleteAll()
+            try! DataBase.shared.realm.commitWrite()
+            
+            if cacheRealm.count > 0 {
+ 
+               
+                DataBase.shared.realm.beginWrite()
+                for count in 0..<cacheRealm.count {
+                  
+                   DataBase.shared.realm.add(cacheRealm[count])
+                }
+                
+
+            }
+        }
+        
+
         forecastTableView.isHidden = false
         forecastNoticeLabel.isHidden = false
         
-        // получим массив и отфильтруем по полю dt_txt, чтобы оставить элементы, содержащие в каждом днем отметку 12:00:))
+        // получим массив и отфильтруем по полю dt_txt, чтобы оставить элементы, содержащие в каждом днем отметку 12:00
         let convertForecastListArray = Array(forecast.list)
         daysForecast = convertForecastListArray.filter{$0.dt_txt!.contains("12:00:00") }
         forecastNoticeLabel.text = "\(daysForecast.count) day weather forecast:"
         
         // сохранение в базу Realm
-        // FIXME: реализовать очистку кеша по данным введëнным больше 5 раз назад
-        DataBase.shared.realm.beginWrite()
-        DataBase.shared.realm.add(result)
-        //print(DataBase.shared.realm.configuration.fileURL) // подсмотреть путь до базы
+        
+        //DataBase.shared.realm.deleteAll()
+        DataBase.shared.realm.add(savedObject, update: .modified)
+        print(DataBase.shared.realm.configuration.fileURL) // подсмотреть путь до базы
         try! DataBase.shared.realm.commitWrite()
         
         forecastTableView.reloadData()
@@ -119,11 +177,13 @@ class ViewController: UIViewController {
     private func updateCurrentWeather(from result: CurrentWeather){
         currentWeather = result
         weatherInCityLabel.isHidden = false
+        weatherIconImageView.isHidden = false
         weatherInCityLabel.text = "Weather in \(currentWeather.name!):"
         
         //FIXME: сделать метод по получению картинки, рассинхозировать загрузку картинки, сохранить ярлык в кеш
         if let iconShortCut = currentWeather.weather.first?.icon {
             let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(iconShortCut)@2x.png")
+            print("https://openweathermap.org/img/wn/\(iconShortCut)@2x.png")
             if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
                self.weatherIconImageView.image = image
             }
@@ -131,10 +191,6 @@ class ViewController: UIViewController {
         
         currentTemperatureLabel.isHidden = false
         currentTemperatureLabel.text = "\(convertKelvToCelsius(currentWeather.main?.temp)!)°C"
-        
-        DataBase.shared.realm.beginWrite()
-        DataBase.shared.realm.add(result)
-        try! DataBase.shared.realm.commitWrite()
         
     }
     

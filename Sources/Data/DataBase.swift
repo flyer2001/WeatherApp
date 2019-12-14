@@ -8,6 +8,9 @@
 
 import Foundation
 import RealmSwift
+import Realm
+
+let maximumCacheCount = 5  //максимальное количество хранимых в базе запросов
 
 enum RealmFile : String {
     case file = "file.realm"
@@ -18,6 +21,7 @@ class DataBase {
     static let shared = DataBase()
 
     let realm : Realm
+    
     
     static var fileManager: FileManager = {
         return FileManager.default
@@ -52,7 +56,7 @@ class DataBase {
             inMemoryIdentifier: nil,
             encryptionKey: nil,
             readOnly: false,
-            schemaVersion: 5,
+            schemaVersion: 19,
             migrationBlock: nil,
             deleteRealmIfMigrationNeeded: false,
             objectTypes: nil)
@@ -79,3 +83,4 @@ class DataBase {
         }
     }
 }
+

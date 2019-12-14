@@ -9,6 +9,33 @@
 import Realm
 import RealmSwift
 
+//дополнительное поле для хранения поискового запроса вместе с результатом запроса
+
+class IndexForecast: Object, Decodable {
+
+    @objc dynamic var city: String
+    @objc dynamic var forecast: Forecast?
+    
+    override static func primaryKey() -> String {
+      return "city"
+    }
+    
+    required init(city: String, forecast: Forecast?) {
+        self.city = city
+        self.forecast = forecast
+        super.init()
+    }
+
+    required init() {
+        city = ""
+        forecast = Forecast()
+        super.init()
+    }
+    
+}
+
+//описание модели
+
 class Forecast: Object, Decodable {
 
     @objc dynamic var cod: String?
@@ -17,11 +44,13 @@ class Forecast: Object, Decodable {
     var list = List<DayForecast>()
     @objc dynamic var city: City?
     
-    required init(cod: String, message: RealmOptional<Int>, cnt: RealmOptional<Int>) {
+    required init(cod: String?, message: RealmOptional<Int>, cnt: RealmOptional<Int>) {
         self.cod = cod
         self.message = message
         self.cnt = cnt
+        
         super.init()
+        
     }
     
     required init() {
