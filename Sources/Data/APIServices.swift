@@ -29,6 +29,7 @@ final public class APIServices {
         }
     }
     
+    
     func getObject<T:Decodable>(
         cityName: String,
         domain: Domain,
@@ -50,4 +51,7 @@ final public class APIServices {
         }
     }
     
+    func checkInternetConnection() -> Bool {
+        return NetworkReachabilityManager()?.isReachable ?? false
+    }
 }

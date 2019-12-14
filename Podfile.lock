@@ -1,5 +1,6 @@
 PODS:
   - Alamofire (4.9.1)
+  - iOSDropDown (0.3.4)
   - Realm (4.1.1):
     - Realm/Headers (= 4.1.1)
   - Realm/Headers (4.1.1)
@@ -8,19 +9,22 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire
+  - iOSDropDown
   - RealmSwift
 
 SPEC REPOS:
   trunk:
     - Alamofire
+    - iOSDropDown
     - Realm
     - RealmSwift
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
+  iOSDropDown: c10a761f9a00c3f1cc9d3bce43ae504628e2f692
   Realm: 25f0a8244cbb1c2271c922963ea8666fc2d8104d
   RealmSwift: 9e2657b33764f80e4a4dffd6d440e24715782052
 
-PODFILE CHECKSUM: 9e72516b73386dd7b66f43351a227e3223dc38c5
+PODFILE CHECKSUM: 0825b4f4f47453f9eaec028d91d16135eff06929
 
 COCOAPODS: 1.8.4

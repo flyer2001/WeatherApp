@@ -10,6 +10,7 @@ import Foundation
 
 import RealmSwift
 
+
 class CurrentWeatherError: Object, Decodable {
     
     @objc dynamic var cod: String?
