@@ -50,13 +50,15 @@ class DataBase {
         self.realm = Self.openRealm(.file)
     }
     
+    
+    
     private static func realmConfiguration(fileURL: URL) -> Realm.Configuration {
         let result = Realm.Configuration(
             fileURL: fileURL,
             inMemoryIdentifier: nil,
             encryptionKey: nil,
             readOnly: false,
-            schemaVersion: 19,
+            schemaVersion: 54,
             migrationBlock: nil,
             deleteRealmIfMigrationNeeded: false,
             objectTypes: nil)
