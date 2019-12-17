@@ -73,7 +73,7 @@ class ViewController: UIViewController {
                 APIServices.shared.getObject(cityName: city, domain: .domainForecast){
                     [weak self](result: Forecast?, error: Error?) in
                         if let error = error {
-                            //print("\(error)")
+                            print("\(error)")
                         } else if let result = result {
                             //print("\(result)")
                             self?.updateForecast(from: result)
@@ -128,31 +128,60 @@ class ViewController: UIViewController {
     
     private func updateForecast(from result: Forecast){
         forecast = result
-        DataBase.shared.realm.beginWrite()
+   
         var savedObject = IndexForecast()
         
-        //Удаляем предыдущее значение города, если есть
+        var checkToUpdate: Results<Forecast>
+        
         
         if let cityFromJSON = forecast.city?.name {
-            savedObject = IndexForecast(city: cityFromJSON, forecast: forecast)
+            savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast)
+            savedObject.forecast?.cityKey = cityFromJSON
+            checkToUpdate = DataBase.shared.realm.objects(Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
             
-            var cacheRealm = Array(DataBase.shared.realm.objects(IndexForecast.self))
-            cacheRealm = cacheRealm.filter{$0.city != cityFromJSON}
-            
-            DataBase.shared.realm.deleteAll()
-            try! DataBase.shared.realm.commitWrite()
-            
-            if cacheRealm.count > 0 {
- 
-               
+            if checkToUpdate.count == 0 {
+                if let dayForecastUpdate = savedObject.forecast?.list {
+                    for dayForecast in dayForecastUpdate {
+                        dayForecast.id = UUID().uuidString
+                    }
                 DataBase.shared.realm.beginWrite()
-                for count in 0..<cacheRealm.count {
-                  
-                   DataBase.shared.realm.add(cacheRealm[count])
+                DataBase.shared.realm.add(savedObject, update: .all)
+                try! DataBase.shared.realm.commitWrite()
                 }
-                
-
             }
+            
+            //FIXME: реализовать генерацию нового айди для новых полей и фильтрацию по текущей дате, и может сделать общую функцию чтобы чистить реалм при старте на протухшие значения
+//           else {
+//                if let oldDayForecastConvert = Array(checkToUpdate).first {
+//
+//                    //FIXME: при отфильтровать все значения Forecast по полю dt, которые меньше текущего дня
+//                    var oldDayForecast = [DayForecast]()
+//                    for dayForecast in oldDayForecastConvert.list {
+//                        oldDayForecast.append(dayForecast)
+//                    }
+//                    var newDayForecast = [DayForecast]()
+//                    for dayForecast in forecast.list {
+//                        newDayForecast.append(dayForecast)
+//                    }
+//                    // save old ID
+//                    for newDayForecast in newDayForecast {
+//                        for oldDayForecast in oldDayForecast {
+//                            if newDayForecast.dt_txt == oldDayForecast.dt_txt {
+//                                newDayForecast.id = oldDayForecast.id
+//                            }
+//                        }
+//                    }
+//                    let uniqueElementsDayForecast = Set(newDayForecast).subtracting(Set(oldDayForecast))
+//
+//                    // FIXME: найти новые уникальные значения и им сгенерировать ID
+//                    for dayForecast in Array(uniqueElementsDayForecast) {
+//
+//                        //dayForecast.id = UUID().uuidString
+//                    }
+//                }
+//
+//            }
+            
         }
         
 
@@ -167,9 +196,10 @@ class ViewController: UIViewController {
         // сохранение в базу Realm
         
         //DataBase.shared.realm.deleteAll()
-        DataBase.shared.realm.add(savedObject, update: .modified)
+        //DataBase.shared.realm.beginWrite()
+       //DataBase.shared.realm.add(savedObject, update: .all)
         print(DataBase.shared.realm.configuration.fileURL) // подсмотреть путь до базы
-        try! DataBase.shared.realm.commitWrite()
+       //try! DataBase.shared.realm.commitWrite()
         
         forecastTableView.reloadData()
     }
@@ -193,7 +223,6 @@ class ViewController: UIViewController {
         currentTemperatureLabel.text = "\(convertKelvToCelsius(currentWeather.main?.temp)!)°C"
         
     }
-    
     
     
     private func convertKelvToCelsius (_ temp: RealmOptional<Double>?) -> Int? {
