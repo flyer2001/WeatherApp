@@ -11,13 +11,15 @@ import RealmSwift
 import Alamofire
 import iOSDropDown
 
+ 
+
 class ViewController: UIViewController {
     //FIX: пофиксить констрейнты
-    
     
     var forecast = Forecast()
     var currentWeather = CurrentWeather()
     var daysForecast = [DayForecast]()
+    // установим TimeZone в которой нам приходят ответы от API
     
     var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
     
@@ -26,6 +28,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var cityTextField: UITextField!
     @IBOutlet weak var weatherInCityLabel: UILabel!
     @IBOutlet weak var currentTemperatureLabel: UILabel!
+    @IBOutlet weak var currentWeatherDescLabel: UILabel!
     @IBOutlet weak var forecastNoticeLabel: UILabel!
     @IBOutlet weak var forecastTableView: UITableView!
     @IBOutlet weak var weatherIconImageView: UIImageView!
@@ -37,6 +40,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         weatherInCityLabel.isHidden = true
         currentTemperatureLabel.isHidden = true
+        currentWeatherDescLabel.isHidden = true
         forecastTableView.isHidden = true
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
@@ -44,16 +48,62 @@ class ViewController: UIViewController {
         dropDownMenuOfSavedSearch.text = "Choose"
         dropDownMenuOfSavedSearch.isSearchEnable = false
         dropDownMenuOfSavedSearch.optionArray = ["1", "2", "3", "4", "5"]
+        
         //Проверяем есть ли интернет и в случае если нет запускаем Offline вариант с загрузкой из кеша
         checkOfflineMode()
         
-        //получаем данные из базы Realm
-        if let cacheRealmDB = DataBase.shared.realm.objects(Forecast.self).last {
-            daysForecast = Array(cacheRealmDB.list)
-        }
+        //offlineUpdate()
+        
         
         forecastTableView.reloadData()
     }
+    
+    private func offlineUpdate() {
+        //удалим устаревшие объекты
+        let currentTimeStamp = getCurrentTimeStamp()
+        let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
+        
+        DataBase.shared.realm.beginWrite()
+        DataBase.shared.realm.delete(dayForecastToDelete)
+        try! DataBase.shared.realm.commitWrite()
+        
+        if let cache = DataBase.shared.realm.objects(Forecast.self).last {
+        
+            let convertForecastListArray = Array(cache.list)
+            daysForecast = convertForecastListArray.filter{$0.dt_txt!.contains("12:00:00") }
+            forecastNoticeLabel.text = "\(daysForecast.count) day weather forecast:"
+            
+            let currentTimeForecastFiltered = convertForecastListArray.filter{$0.dt.value ?? 0 > currentTimeStamp}
+            
+            if let currentWeatherForecast = currentTimeForecastFiltered.first {
+                if let currentWeather = currentWeatherForecast.weather.first {
+                    weatherInCityLabel.isHidden = false
+                    currentTemperatureLabel.isHidden = false
+                    
+                 
+                   // currentTemperatureLabel.text =  "\(convertKelvToCelsius(23.0))°C"
+                    
+                    weatherInCityLabel.text = "Weather in \(cache.cityKey ?? "Error"):"
+                }
+                
+            }
+            
+            forecastTableView.reloadData()
+        }
+        
+    }
+    
+    private func getCurrentTimeStamp() -> Int {
+        let timeShiftForCurrentLocal: Int = TimeZone.current.secondsFromGMT()
+        print(timeShiftForCurrentLocal)
+        let currentDate = Date()
+        let since1970 = currentDate.timeIntervalSince1970
+        let timeStampUTC = Int(since1970) - timeShiftForCurrentLocal
+        return timeStampUTC
+    }
+    
+    
+
 
     
     @IBAction func getForecastButton(_ sender: Any) {
@@ -109,6 +159,8 @@ class ViewController: UIViewController {
         
     }
     
+
+    
     private func checkOfflineMode(){
         if APIServices.shared.checkInternetConnection() == false {
             print("NO INTERNET")
@@ -133,7 +185,7 @@ class ViewController: UIViewController {
         
         var checkToUpdate: Results<Forecast>
         
-        
+        //FIXME: убрать в отдельную функцию
         if let cityFromJSON = forecast.city?.name {
             savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast)
             savedObject.forecast?.cityKey = cityFromJSON

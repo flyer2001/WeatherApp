@@ -83,12 +83,21 @@
                                                         <constraint firstAttribute="width" constant="50" id="Y3j-Qc-l3h"/>
                                                     </constraints>
                                                 </imageView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Ot-eN-nBf">
+                                                    <rect key="frame" x="20" y="15.5" width="42" height="20.5"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstItem="4Ot-eN-nBf" firstAttribute="centerY" secondItem="5K4-Ut-aEu" secondAttribute="centerY" id="2pb-gN-LNV"/>
+                                                <constraint firstItem="4Ot-eN-nBf" firstAttribute="centerX" secondItem="5K4-Ut-aEu" secondAttribute="centerX" id="3MS-ja-DE3"/>
                                                 <constraint firstItem="nuM-he-dWs" firstAttribute="centerX" secondItem="R5o-fI-e43" secondAttribute="centerX" id="6lL-04-2Q7"/>
                                                 <constraint firstAttribute="trailing" secondItem="Kyy-fq-3md" secondAttribute="trailing" id="GVg-FN-Wjh"/>
                                                 <constraint firstItem="Kyy-fq-3md" firstAttribute="leading" secondItem="nuM-he-dWs" secondAttribute="trailing" constant="58.5" id="KrH-mH-vwI"/>
                                                 <constraint firstItem="5K4-Ut-aEu" firstAttribute="centerY" secondItem="R5o-fI-e43" secondAttribute="centerY" id="LAO-Of-H7H"/>
+                                                <constraint firstItem="4Ot-eN-nBf" firstAttribute="leading" secondItem="R5o-fI-e43" secondAttribute="leading" constant="20" id="V0K-UJ-wWt"/>
                                                 <constraint firstItem="Kyy-fq-3md" firstAttribute="centerY" secondItem="R5o-fI-e43" secondAttribute="centerY" id="W0r-Dp-pQS"/>
                                                 <constraint firstItem="5K4-Ut-aEu" firstAttribute="leading" secondItem="R5o-fI-e43" secondAttribute="leading" constant="16" id="vaS-E2-gSk"/>
                                                 <constraint firstItem="nuM-he-dWs" firstAttribute="centerY" secondItem="R5o-fI-e43" secondAttribute="centerY" id="waR-ea-lQY"/>
@@ -136,6 +145,12 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="ья" text="Description" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tT6-7T-sgv">
+                                <rect key="frame" x="16" y="196" width="88" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
@@ -153,6 +168,8 @@
                             <constraint firstItem="B60-mr-kgs" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="R5r-1o-Bp3"/>
                             <constraint firstItem="vJ0-ls-mmh" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="U5e-1A-UDO"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="vJ0-ls-mmh" secondAttribute="trailing" symbolic="YES" id="ZO7-Sh-dVN"/>
+                            <constraint firstItem="B60-mr-kgs" firstAttribute="leading" secondItem="tT6-7T-sgv" secondAttribute="trailing" constant="48" id="Zao-68-Owj"/>
+                            <constraint firstItem="tT6-7T-sgv" firstAttribute="centerY" secondItem="B60-mr-kgs" secondAttribute="centerY" id="aZR-qc-Fve"/>
                             <constraint firstItem="rWv-gp-hcm" firstAttribute="top" secondItem="vJ0-ls-mmh" secondAttribute="bottom" constant="8" id="aaF-KF-nrS"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="NuM-1I-w1c" secondAttribute="trailing" id="bbc-hK-V7F"/>
                             <constraint firstItem="R6y-GZ-L4H" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="d5F-dc-fgw"/>
@@ -170,6 +187,7 @@
                     <connections>
                         <outlet property="cityTextField" destination="zmR-rB-rQX" id="p99-54-iZe"/>
                         <outlet property="currentTemperatureLabel" destination="B60-mr-kgs" id="zbt-aq-HQF"/>
+                        <outlet property="currentWeatherDescLabel" destination="tT6-7T-sgv" id="fAi-Aj-JhM"/>
                         <outlet property="dropDownMenuOfSavedSearch" destination="BC0-GD-ou9" id="Maf-dB-vft"/>
                         <outlet property="forecastNoticeLabel" destination="R6y-GZ-L4H" id="u6u-bg-0ng"/>
                         <outlet property="forecastTableView" destination="NuM-1I-w1c" id="QF0-h5-kEW"/>

@@ -14,6 +14,7 @@ class ForecastTableViewCell: UITableViewCell {
     @IBOutlet weak var dateCellLabel: UILabel!
     @IBOutlet weak var forecastIconImageView: UIImageView!
     
+    
     func setTemperatureLabel(_ temperatureString: String?) {
         cellLabel.text = temperatureString
     }
