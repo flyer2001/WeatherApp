@@ -15,20 +15,23 @@ class IndexForecast: Object, Decodable {
 
     @objc dynamic var cityKey: String
     @objc dynamic var forecast: Forecast?
+    var timeStamp: RealmOptional<Int>
     
     override static func primaryKey() -> String {
       return "cityKey"
     }
     
-    required init(cityKey: String, forecast: Forecast?) {
+    required init(cityKey: String, forecast: Forecast?, timeStamp: RealmOptional<Int>) {
         self.cityKey = cityKey
         self.forecast = forecast
+        self.timeStamp = timeStamp
         super.init()
     }
 
     required init() {
         cityKey = ""
         forecast = Forecast()
+        timeStamp = RealmOptional(0)
         super.init()
     }
     
@@ -214,6 +217,12 @@ class Main: Object, Decodable {
         self.humidity = humidity
         self.temp_kf = temp_kf
         super.init()
+    }
+    
+    @objc dynamic var id: String?
+    
+    override class func primaryKey() -> String? {
+        return "id"
     }
     
     required init() {

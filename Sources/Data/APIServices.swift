@@ -15,6 +15,8 @@ final public class APIServices {
     
     private let keyAPI = "c21154f65ac934ec1c3af7b754337205" // ключ, полученный на сайте owm
     private let  parsingMode = "json"
+    
+    //используются 2 API для текущей погоды и прогноза погоды
     enum Domain {
         case domainCurrentWeather
         case domainForecast
@@ -29,7 +31,6 @@ final public class APIServices {
         }
     }
     
-    
     func getObject<T:Decodable>(
         cityName: String,
         domain: Domain,
@@ -37,7 +38,6 @@ final public class APIServices {
             let cityNameWithoutSpaces = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
             let resultURL = "\(domain.address)q=\(cityNameWithoutSpaces!)&mode=\(parsingMode)&APPID=\(keyAPI)"
             request(resultURL).responseData(){ response in
-                
                 response.result.withValue { data in
                     do {
                         let result = try JSONDecoder.init().decode(T.self, from: data)
