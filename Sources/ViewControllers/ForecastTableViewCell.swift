@@ -50,20 +50,14 @@ class ForecastTableViewCell: UITableViewCell {
         } else {
             print("There was an error decoding the string")
         }
-        
-        
     }
     
     func setImage(_ iconShorcut: String?) {
-     if let shortCut = iconShorcut {
-         let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(shortCut)@2x.png")
-         if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
-            self.forecastIconImageView.image = image
-         }
-     }
-        
-        
+        if let shortCut = iconShorcut {
+            let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(shortCut)@2x.png")
+            if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
+                self.forecastIconImageView.image = image
+            }
+        }
     }
-
-
 }

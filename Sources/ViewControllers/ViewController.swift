@@ -12,18 +12,14 @@ import Alamofire
 import iOSDropDown
 
 class ViewController: UIViewController {
-    //FIX: пофиксить констрейнты
     
     var forecast = Forecast()
     var currentWeather = CurrentWeather()
     var daysForecast = [DayForecast]()
     var selectedCity = ""
     var predicate = NSPredicate()
-    
     var isTableViewUpdateFromCache = true
-    
     var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
-    
     let REUSE_ID = "cell"
     
     @IBOutlet weak var cityTextField: UITextField!
@@ -47,56 +43,36 @@ class ViewController: UIViewController {
         dropDownMenuOfSavedSearch.text = "Choose"
         dropDownMenuOfSavedSearch.isSearchEnable = false
         dropDownMenuOfSavedSearch.didSelect{(selectedText, index, id) in
-            print("Select \(selectedText)")
             self.selectedCity = selectedText
             self.offlineUpdate()
         }
         
-        //Проверяем есть ли интернет и в случае если нет запускаем Offline вариант с загрузкой из кеша
-        checkOfflineMode()
-        
         offlineUpdate()
-        
-        
-        forecastTableView.reloadData()
-    }
-    
-    private func chooseCity(city: String){
-        if let cityCache = DataBase.shared.realm.objects(IndexForecast.self).filter("cityKey == \(city)").first {
-            if let forecastFromCache = cityCache.forecast {
-                let convertForecastListArray = Array(forecastFromCache.list)
-                daysForecast = convertForecastListArray.filter{($0.dt_txt!.contains("12:00:00")) }
-                
-                forecastNoticeLabel.text = "\(daysForecast.count) day weather forecast:"
-                
-            
-            }
-        }
+        //forecastTableView.reloadData()
     }
     
     private func offlineUpdate() {
         weatherIconImageView.isHidden = true
-        //удалим устаревшие объекты
         forecastNoticeLabel.text = "Press button"
         
+        //удалим устаревшие объекты
         let currentTimeStamp = getCurrentTimeStamp()
         let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
-
         DataBase.shared.realm.beginWrite()
-        //FIXME: при старте, когда голая база нужно все скрыть
-        //DataBase.shared.realm.deleteAll()
         DataBase.shared.realm.delete(dayForecastToDelete)
         try! DataBase.shared.realm.commitWrite()
         
+        //Загружаем список запросов из кеша
         let indexesForecast = DataBase.shared.realm.objects(IndexForecast.self)
-        
         let convertIndexToArray = Array(indexesForecast)
         let dateArray = convertIndexToArray.compactMap{$0.timeStamp.value}
         let lastTimeStamp = dateArray.max()
         let cityOfSearchArray = convertIndexToArray.compactMap{$0.cityKey}
         
+        //Заполнить выпадающее меню списком запросов
         dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray
-  
+        
+        //Выбор фильтрации: по городу или по последнему файлу
         switch selectedCity.count {
         case 0:
             predicate = NSPredicate(format: "timeStamp == \(lastTimeStamp ?? 0)")
@@ -104,20 +80,16 @@ class ViewController: UIViewController {
             predicate = NSPredicate(format: "cityKey = '\(selectedCity)'")
         }
         
+        //получаем объект из кеша и заполняем лейблы и данные для таблицы
         if let lastCacheObjects = DataBase.shared.realm.objects(IndexForecast.self).filter(predicate).first {
             if let lastForecastFromCache = lastCacheObjects.forecast {
-              
-                
                 let convertForecastListArray = Array(lastForecastFromCache.list)
-                
-                daysForecast = convertForecastListArray.filter{($0.dt_txt!.contains("12:00:00")) }
-                
+                daysForecast = convertForecastListArray.filter{($0.dt_txt!.contains("12:00:00"))}
                 
                 forecastNoticeLabel.text = "\(daysForecast.count) day weather forecast:"
                 
                 let currentTimeForecastFiltered = convertForecastListArray.filter{$0.dt.value ?? 0 > currentTimeStamp}
                 if let currentWeatherForecast = currentTimeForecastFiltered.first {
-                    
                     let currentTemp = currentWeatherForecast.main?.temp
                     
                     weatherInCityLabel.isHidden = false
@@ -127,7 +99,6 @@ class ViewController: UIViewController {
                     currentWeatherDescLabel.text = "\(currentWeatherForecast.weather.first?.desc ?? "Error")"
                     currentTemperatureLabel.text = "\(convertKelvToCelsius(currentTemp?.value))°C"
                     weatherInCityLabel.text = "Weather in \(lastForecastFromCache.cityKey ?? "Error"):"
-                    
                 }
             }
         forecastTableView.isHidden = false
@@ -135,12 +106,7 @@ class ViewController: UIViewController {
         forecastTableView.reloadData()
         }
         
-
         forecastNoticeLabel.isHidden = false
-        
-        
-        
-        
     }
     
     private func getCurrentTimeStamp() -> Int {
@@ -160,7 +126,7 @@ class ViewController: UIViewController {
         weatherIconImageView.isHidden = true
         currentWeatherDescLabel.isHidden = true
         
-        //Если поле нажатия кнопки нет Интернета, загрузить Offline Mode
+        //Если поле нажатия кнопки нет Интернета метод предупреждает пользователя об этом
         checkOfflineMode()
         
         if APIServices.shared.checkInternetConnection() == false {
@@ -180,19 +146,18 @@ class ViewController: UIViewController {
                 APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
                     [weak self](result: CurrentWeather?, error: Error?) in
                         if let error = error {
-                            //print("\(error)")
+                            print("\(error)")
                             
                             //повторный запрос к серверу, чтобы получить нормальный код ошибки
                             APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
                                 [weak self](result: CurrentWeatherError?, error: Error?) in
                                     if let error = error {
-                                        //print("\(error)")
+                                        print("\(error)")
                                     } else if let result = result {
                                         //print("\(result)")
                                         self?.sendCurrentWeatherError(from: result)
                                     }
                             }
-                            
                         } else if let result = result {
                             //print("\(result)")
                             self?.updateCurrentWeather(from: result)
@@ -200,17 +165,10 @@ class ViewController: UIViewController {
                 }
             }
         }
-        
-        //FIXME: реализовать загрузку из кеша, причем загрузить в ту же таблицы последние запросы, дать возможность пользователю выбрать нужный город из запроса
-        //FIXME: при старте сразу загрузить из кеша последний запрос, отфильтрованный по дням
-        
     }
-    
-
     
     private func checkOfflineMode(){
         if APIServices.shared.checkInternetConnection() == false {
-            print("NO INTERNET")
             weatherInCityLabel.isHidden = false
             weatherInCityLabel.text = "Check your internet connection"
         }
@@ -227,18 +185,17 @@ class ViewController: UIViewController {
     
     private func updateForecast(from result: Forecast){
         forecast = result
-   
-        var savedObject = IndexForecast()
         
+        //Модель IndexForecast - для хранения запросов и результатов
+        var savedObject = IndexForecast()
         var checkToUpdate: Results<Forecast>
         
-        //FIXME: убрать в отдельную функцию
         if let cityFromJSON = forecast.city?.name {
-            
             savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast, timeStamp: RealmOptional(getCurrentTimeStamp()))
             savedObject.forecast?.cityKey = cityFromJSON
             checkToUpdate = DataBase.shared.realm.objects(Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
             
+            //выходим за пределы инкапсуляции и присваеваем primary key id
             if checkToUpdate.count == 0 {
                 if let dayForecastUpdate = savedObject.forecast?.list {
                     for dayForecast in dayForecastUpdate {
@@ -251,15 +208,13 @@ class ViewController: UIViewController {
                 try! DataBase.shared.realm.commitWrite()
                 }
             }
-
+        let convertForecastListArray = Array(forecast.list)
+        daysForecast = convertForecastListArray.filter{$0.dt_txt!.contains("12:00:00")}
+        
         forecastTableView.isHidden = false
         forecastNoticeLabel.isHidden = false
         isTableViewUpdateFromCache = false
         currentWeatherDescLabel.isHidden = true
-        
-        // получим массив и отфильтруем по полю dt_txt, чтобы оставить элементы, содержащие в каждом днем отметку 12:00
-        let convertForecastListArray = Array(forecast.list)
-        daysForecast = convertForecastListArray.filter{$0.dt_txt!.contains("12:00:00") }
         forecastNoticeLabel.text = "\(daysForecast.count) day weather forecast:"
         
         forecastTableView.reloadData()
@@ -270,8 +225,7 @@ class ViewController: UIViewController {
         weatherInCityLabel.isHidden = false
         weatherIconImageView.isHidden = false
         weatherInCityLabel.text = "Weather in \(currentWeather.name ?? "Error"):"
-        
-        //FIXME: сделать метод по получению картинки, рассинхозировать загрузку картинки, сохранить ярлык в кеш
+    
         if let iconShortCut = currentWeather.weather.first?.icon {
             let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(iconShortCut)@2x.png")
             if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
@@ -284,11 +238,9 @@ class ViewController: UIViewController {
         
     }
     
-    
     private func convertKelvToCelsius (_ temp: Double?) -> Int {
         guard let tempValue = temp else {return 999}
         return Int(tempValue - 273.15)
-        
     }
     
     
@@ -307,6 +259,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         cell.setTemperatureLabel("\(currentTemperature ?? 0)°C")
         cell.setDateLabel(daysForecast[indexPath.row].dt_txt)
         
+        //Какие данные подгружать в таблицу в зависимости от того из кеша загружается или с Инета
         if isTableViewUpdateFromCache == false {
             
             cell.isHiddenWeatherDescCell(true)
