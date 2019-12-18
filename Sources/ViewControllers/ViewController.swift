@@ -12,15 +12,17 @@ import Alamofire
 import iOSDropDown
 
 class ViewController: UIViewController {
-    
+    // выпадающий список чтобы сразу обновлялся
+    // констрейнт задать высоту
     var forecast = Forecast()
     var currentWeather = CurrentWeather()
     var daysForecast = [DayForecast]()
     var selectedCity = ""
+    var cityOfSearchArray = [String]()
     var predicate = NSPredicate()
     var isTableViewUpdateFromCache = true
     var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
-    let REUSE_ID = "cell"
+    let cellIdentifier = "cell" 
     
     @IBOutlet weak var cityTextField: UITextField!
     @IBOutlet weak var weatherInCityLabel: UILabel!
@@ -41,7 +43,7 @@ class ViewController: UIViewController {
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
         dropDownMenuOfSavedSearch.text = "Choose"
-        dropDownMenuOfSavedSearch.isSearchEnable = false
+        dropDownMenuOfSavedSearch.isSearchEnable = true
         dropDownMenuOfSavedSearch.didSelect{(selectedText, index, id) in
             self.selectedCity = selectedText
             self.offlineUpdate()
@@ -67,10 +69,10 @@ class ViewController: UIViewController {
         let convertIndexToArray = Array(indexesForecast)
         let dateArray = convertIndexToArray.compactMap{$0.timeStamp.value}
         let lastTimeStamp = dateArray.max()
-        let cityOfSearchArray = convertIndexToArray.compactMap{$0.cityKey}
+        cityOfSearchArray = convertIndexToArray.compactMap{$0.cityKey}
         
         //Заполнить выпадающее меню списком запросов
-        dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray
+        dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray.reversed()
         
         //Выбор фильтрации: по городу или по последнему файлу
         switch selectedCity.count {
@@ -125,7 +127,7 @@ class ViewController: UIViewController {
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
         currentWeatherDescLabel.isHidden = true
-        
+    
         //Если поле нажатия кнопки нет Интернета метод предупреждает пользователя об этом
         checkOfflineMode()
         
@@ -191,6 +193,12 @@ class ViewController: UIViewController {
         var checkToUpdate: Results<Forecast>
         
         if let cityFromJSON = forecast.city?.name {
+            //добавляем город в выпадающее меню
+            cityOfSearchArray = cityOfSearchArray.filter{$0 != cityFromJSON}
+            cityOfSearchArray.insert(cityFromJSON, at: 0)
+            dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray
+            //dropDownMenuOfSavedSearch.reloadInputViews()
+            
             savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast, timeStamp: RealmOptional(getCurrentTimeStamp()))
             savedObject.forecast?.cityKey = cityFromJSON
             checkToUpdate = DataBase.shared.realm.objects(Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
@@ -254,7 +262,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell = tableView.dequeueReusableCell(withIdentifier: REUSE_ID) as! ForecastTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as! ForecastTableViewCell
         let currentTemperature = convertKelvToCelsius(daysForecast[indexPath.row].main?.temp.value)
         cell.setTemperatureLabel("\(currentTemperature ?? 0)°C")
         cell.setDateLabel(daysForecast[indexPath.row].dt_txt)
