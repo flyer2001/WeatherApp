@@ -24,6 +24,7 @@ class ViewController: UIViewController {
     var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
     let cellIdentifier = "cell" 
     
+    @IBOutlet weak var getForecastButton: UIButton!
     @IBOutlet weak var cityTextField: UITextField!
     @IBOutlet weak var weatherInCityLabel: UILabel!
     @IBOutlet weak var currentTemperatureLabel: UILabel!
@@ -40,6 +41,7 @@ class ViewController: UIViewController {
         currentTemperatureLabel.isHidden = true
         currentWeatherDescLabel.isHidden = true
         forecastTableView.isHidden = true
+        forecastTableView.alwaysBounceVertical = false
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
         dropDownMenuOfSavedSearch.text = "Choose"
@@ -48,6 +50,7 @@ class ViewController: UIViewController {
             self.selectedCity = selectedText
             self.offlineUpdate()
         }
+        
         
         offlineUpdate()
         //forecastTableView.reloadData()
@@ -127,6 +130,12 @@ class ViewController: UIViewController {
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
         currentWeatherDescLabel.isHidden = true
+        getForecastButton.isEnabled = false
+        getForecastButton.backgroundColor = .gray
+        getForecastButton.setTitle("Updating...", for: .normal)
+        
+        //FIXME: унести время интервала в сетап
+        Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(enableButton), userInfo: nil, repeats: false)
     
         //Если поле нажатия кнопки нет Интернета метод предупреждает пользователя об этом
         checkOfflineMode()
@@ -167,6 +176,12 @@ class ViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    @objc func enableButton() {
+        getForecastButton.isEnabled = true
+        getForecastButton.setTitle("Get Forecast", for: .normal) 
+        getForecastButton.backgroundColor = .blue
     }
     
     private func checkOfflineMode(){
