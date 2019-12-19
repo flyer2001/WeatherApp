@@ -69,6 +69,7 @@ class ViewController: UIViewController {
         let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
         DataBase.shared.realm.beginWrite()
         DataBase.shared.realm.delete(dayForecastToDelete)
+        //DataBase.shared.realm.deleteAll()
         try! DataBase.shared.realm.commitWrite()
         
         //Загружаем список запросов из кеша
@@ -99,14 +100,15 @@ class ViewController: UIViewController {
                 
                 let currentTimeForecastFiltered = convertForecastListArray.filter{$0.dt.value ?? 0 > currentTimeStamp}
                 if let currentWeatherForecast = currentTimeForecastFiltered.first {
-                    let currentTemp = currentWeatherForecast.main?.temp
-                    
+                    if let currentTemp = currentWeatherForecast.main?.temp.value {
+                        currentTemperatureLabel.text = "\(Int(currentTemp)) °C"
+                    }
                     weatherInCityLabel.isHidden = false
                     currentTemperatureLabel.isHidden = false
                     currentWeatherDescLabel.isHidden = false
                     
                     currentWeatherDescLabel.text = "\(currentWeatherForecast.weather.first?.desc ?? "Error")"
-                    currentTemperatureLabel.text = "\(convertKelvToCelsius(currentTemp?.value))°C"
+                    
                     weatherInCityLabel.text = "Weather in \(lastForecastFromCache.cityKey ?? "Error"):"
                 }
             }
@@ -264,15 +266,10 @@ class ViewController: UIViewController {
         }
         
         currentTemperatureLabel.isHidden = false
-        currentTemperatureLabel.text = "\(convertKelvToCelsius(currentWeather.main?.temp.value))°C"
-        
+        if let currentTemperature = currentWeather.main?.temp.value {
+            currentTemperatureLabel.text = "\(Int(currentTemperature)) °C"
+        }
     }
-    
-    private func convertKelvToCelsius (_ temp: Double?) -> Int {
-        guard let tempValue = temp else {return 999}
-        return Int(tempValue - 273.15)
-    }
-    
     
 }
 //MARK: -UITableViewDataSource, -UITableViewDelegate
@@ -285,8 +282,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as! ForecastTableViewCell
-        let currentTemperature = convertKelvToCelsius(daysForecast[indexPath.row].main?.temp.value)
-        cell.setTemperatureLabel("\(currentTemperature ?? 0)°C")
+        if let currentTemperature = daysForecast[indexPath.row].main?.temp.value {
+            cell.setTemperatureLabel("\(Int(currentTemperature)) °C")
+        }
         cell.setDateLabel(daysForecast[indexPath.row].dt_txt)
         
         //Какие данные подгружать в таблицу в зависимости от того из кеша загружается или с Инета
