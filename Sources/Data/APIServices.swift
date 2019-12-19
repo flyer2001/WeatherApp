@@ -13,6 +13,7 @@ final public class APIServices {
     
     public static let shared = APIServices()
     
+    private let domain = "api.openweather.org"
     private let keyAPI = "c21154f65ac934ec1c3af7b754337205" // ключ, полученный на сайте owm
     private let  parsingMode = "json"
     
@@ -32,12 +33,10 @@ final public class APIServices {
     }
     
     func getObject<T:Decodable>(
-        cityName: String,
-        domain: Domain,
+        domain: String,
+        params: Parameters,
         handler: @escaping (_ object: T?, _ error: Error?) -> Void) {
-            let cityNameWithoutSpaces = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            let resultURL = "\(domain.address)q=\(cityNameWithoutSpaces!)&mode=\(parsingMode)&APPID=\(keyAPI)"
-            request(resultURL).responseData(){ response in
+            request(domain, method: .get, parameters: params).responseData(){ response in
                 response.result.withValue { data in
                     do {
                         let result = try JSONDecoder.init().decode(T.self, from: data)

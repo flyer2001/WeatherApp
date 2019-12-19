@@ -22,7 +22,9 @@ class ViewController: UIViewController {
     var predicate = NSPredicate()
     var isTableViewUpdateFromCache = true
     var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
-    let cellIdentifier = "cell" 
+    let cellIdentifier = "cell"
+    
+
     
     @IBOutlet weak var getForecastButton: UIButton!
     @IBOutlet weak var cityTextField: UITextField!
@@ -37,6 +39,8 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        
         weatherInCityLabel.isHidden = true
         currentTemperatureLabel.isHidden = true
         currentWeatherDescLabel.isHidden = true
@@ -144,7 +148,9 @@ class ViewController: UIViewController {
             print("NO INTERNET")
         } else {
             if let city = cityTextField.text {
-                APIServices.shared.getObject(cityName: city, domain: .domainForecast){
+                let cityNameWithoutSpaces = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                let forecastURL = domain+dataVersionMethod+forecastMethod+cityNameWithoutSpaces
+                APIServices.shared.getObject(domain: forecastURL, params: params){
                     [weak self](result: Forecast?, error: Error?) in
                         if let error = error {
                             print("\(error)")
@@ -154,13 +160,14 @@ class ViewController: UIViewController {
                         }
                 }
                 
-                APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
+                let currentWeatherURL = domain+dataVersionMethod+currentWeatherMethod+cityNameWithoutSpaces
+                APIServices.shared.getObject(domain: currentWeatherURL, params: params){
                     [weak self](result: CurrentWeather?, error: Error?) in
                         if let error = error {
                             print("\(error)")
                             
                             //повторный запрос к серверу, чтобы получить нормальный код ошибки
-                            APIServices.shared.getObject(cityName: city, domain: .domainCurrentWeather){
+                            APIServices.shared.getObject(domain: currentWeatherURL, params: params){
                                 [weak self](result: CurrentWeatherError?, error: Error?) in
                                     if let error = error {
                                         print("\(error)")
