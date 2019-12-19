@@ -13,41 +13,27 @@ final public class APIServices {
     
     public static let shared = APIServices()
     
-    private let keyAPI = "c21154f65ac934ec1c3af7b754337205" // ключ, полученный на сайте owm
-    private let  parsingMode = "json"
+    let sessionManager = SessionManager.default
     
-    //используются 2 API для текущей погоды и прогноза погоды
-    enum Domain {
-        case domainCurrentWeather
-        case domainForecast
-        
-        var address: String {
-            switch self {
-            case .domainCurrentWeather:
-                return "https://api.openweathermap.org/data/2.5/weather?"
-            case .domainForecast:
-                return "https://api.openweathermap.org/data/2.5/forecast?"
-            }
-        }
-    }
     
     func getObject<T:Decodable>(
-        cityName: String,
-        domain: Domain,
-        handler: @escaping (_ object: T?, _ error: Error?) -> Void) {
-            let cityNameWithoutSpaces = cityName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            let resultURL = "\(domain.address)q=\(cityNameWithoutSpaces!)&mode=\(parsingMode)&APPID=\(keyAPI)"
-            request(resultURL).responseData(){ response in
+        
+        
+        domain: String,
+        params: Parameters,
+        handler: @escaping (_ object: T?, _ error: Error?, _ statusCode: Int?) -> Void) {
+            request(domain, method: .get, parameters: params).responseData(){ response in
+                let responseStatuseCode = response.response?.statusCode
                 response.result.withValue { data in
-                    do {
-                        let result = try JSONDecoder.init().decode(T.self, from: data)
-                        handler(result, nil)
-                    } catch (let error) {
-                        handler(nil, error)
+                        do {
+                            let result = try JSONDecoder.init().decode(T.self, from: data)
+                            handler(result, nil, responseStatuseCode)
+                        } catch (let error) {
+                            handler(nil, error, responseStatuseCode)
+                        }
+                    }.withError { error in
+                        handler(nil, error, responseStatuseCode)
                     }
-                }.withError { error in
-                    handler(nil, error)
-                }
         }
     }
     
@@ -55,3 +41,5 @@ final public class APIServices {
         return NetworkReachabilityManager()?.isReachable ?? false
     }
 }
+
+

@@ -10,26 +10,6 @@ import Foundation
 
 import RealmSwift
 
-
-class CurrentWeatherError: Object, Decodable {
-    
-    @objc dynamic var cod: String?
-    @objc dynamic var message: String?
-    
-    required init(cod: String?, message: String?) {
-        self.cod = cod
-        self.message = message
-        super.init()
-    }
-    
-    required init() {
-        cod = ""
-        message = ""
-        super.init()
-    }
-    
-}
-
 class CurrentWeather: Object, Decodable {
 
     var cod: RealmOptional<Int>
