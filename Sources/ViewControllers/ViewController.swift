@@ -40,6 +40,7 @@ class ViewController: UIViewController {
         currentTemperatureLabel.isHidden = true
         currentWeatherDescLabel.isHidden = true
         forecastTableView.isHidden = true
+        forecastTableView.alwaysBounceVertical = false
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
         dropDownMenuOfSavedSearch.text = "Choose"
@@ -48,6 +49,7 @@ class ViewController: UIViewController {
             self.selectedCity = selectedText
             self.offlineUpdate()
         }
+        
         
         offlineUpdate()
         //forecastTableView.reloadData()
