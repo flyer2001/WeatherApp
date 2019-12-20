@@ -15,30 +15,6 @@ class ForecastTableViewCell: UITableViewCell {
     @IBOutlet weak var forecastIconImageView: UIImageView!
     @IBOutlet weak var textWeatherDescLabel: UILabel!
     
-    func isHiddenWeatherDescCell(_ param: Bool) {
-        if param == true {
-            textWeatherDescLabel.isHidden = true
-            return
-        }
-        textWeatherDescLabel.isHidden = false
-    }
-    
-    func setWeatherDescLabel(_ desc: String?) {
-        textWeatherDescLabel.text = desc
-    }
-    
-    func isHiddenForecastImageView(_ param: Bool) {
-        if param == true {
-            forecastIconImageView.isHidden = true
-            return
-        }
-        forecastIconImageView.isHidden = false
-    }
-    
-    func setTemperatureLabel(_ temperatureString: String?) {
-        cellLabel.text = temperatureString
-    }
-    
     func setDateLabel(_ inputDate: String?) {
         let dateFormatterGet = DateFormatter()
         dateFormatterGet.dateFormat = "yyyy-MM-dd HH:mm:ss"
