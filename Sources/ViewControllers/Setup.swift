@@ -23,5 +23,5 @@ var params: Parameters = [
     "units": "metric"
 ]
 
-let timeOutButtonInterval = 3  // интервал заморозки кнопки "Get Forecast"
+let timeOutButtonInterval = 3.0  // интервал заморозки кнопки "Get Forecast"
 

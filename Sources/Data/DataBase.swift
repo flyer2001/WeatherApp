@@ -50,8 +50,6 @@ class DataBase {
         self.realm = Self.openRealm(.file)
     }
     
-    
-    
     private static func realmConfiguration(fileURL: URL) -> Realm.Configuration {
         let result = Realm.Configuration(
             fileURL: fileURL,
@@ -64,6 +62,19 @@ class DataBase {
             objectTypes: nil)
         
         return result
+    }
+    
+    func deleteDayForecast (_ data: Results<DayForecast>) {
+        DataBase.shared.realm.beginWrite()
+        DataBase.shared.realm.delete(data)
+        //DataBase.shared.realm.deleteAll()
+        try! DataBase.shared.realm.commitWrite()
+    }
+    
+    func updateIndexForeCast (_ data: IndexForecast) {
+        DataBase.shared.realm.beginWrite()
+        DataBase.shared.realm.add(data, update: .all)
+        try! DataBase.shared.realm.commitWrite()
     }
     
     private static  func removeOldFilesFromRealmAtURL(realmURL: URL) {

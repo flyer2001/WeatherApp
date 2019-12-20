@@ -15,7 +15,6 @@ class Forecast: Object, Decodable {
     
     @objc dynamic var cod: String?
     var message: Int?
-    //var cnt: Int?
     var list = List<DayForecast>()
     @objc dynamic var city: City?
     
@@ -32,7 +31,6 @@ class Forecast: Object, Decodable {
     }
     
     required init() {
-        //fatalError("init() has not been implemented")
         super.init()
     }
 }
@@ -103,19 +101,16 @@ class Main: Object, Decodable {
 
 class Weather: Object, Decodable {
     private enum CodingKeys : String, CodingKey {
-//        case id
         case main
         case desc = "description"
         case icon
     }
 
-    //var id: RealmOptional<Int>
     @objc dynamic var main: String?
     @objc dynamic var desc: String?
     @objc dynamic var icon: String?
 
     required init(main: String, desc: String, icon: String) {
-       // self.id = id
         self.main = main
         self.desc = desc
         self.icon = icon

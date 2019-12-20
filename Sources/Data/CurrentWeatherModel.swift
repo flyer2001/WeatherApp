@@ -7,7 +7,6 @@
 //
 
 import Foundation
-
 import RealmSwift
 
 class CurrentWeather: Object, Decodable {
@@ -26,7 +25,6 @@ class CurrentWeather: Object, Decodable {
     required init() {
         super.init()
     }
-    
 }
 
 class MainCurrent: Object, Decodable {
@@ -41,6 +39,5 @@ class MainCurrent: Object, Decodable {
         self.temp = RealmOptional(0)
         super.init()
     }
-    
 }
 

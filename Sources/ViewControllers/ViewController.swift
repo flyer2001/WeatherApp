@@ -12,20 +12,15 @@ import Alamofire
 import iOSDropDown
 
 class ViewController: UIViewController {
-    // констрейнт задать высоту
+
     var forecast = Forecast()
-    var currentWeather = CurrentWeather(cod: 0, name: "")
+    var currentWeather = CurrentWeather()
     var daysForecast = [DayForecast]()
     var selectedCity = ""
     var cityOfSearchArray = [String]()
-    var predicate = NSPredicate()
     var isTableViewUpdateFromCache = true
-    var networkReachabilityManager = Alamofire.NetworkReachabilityManager()
     let cellIdentifier = "cell"
-    
     var getStatusFlag = false
-    
-
     
     @IBOutlet weak var getForecastButton: UIButton!
     @IBOutlet weak var cityTextField: UITextField!
@@ -40,15 +35,15 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        forecastTableView.alwaysBounceVertical = false
         
         weatherInCityLabel.isHidden = true
         currentTemperatureLabel.isHidden = true
         currentWeatherDescLabel.isHidden = true
         forecastTableView.isHidden = true
-        forecastTableView.alwaysBounceVertical = false
         forecastNoticeLabel.isHidden = true
         weatherIconImageView.isHidden = true
+        
         dropDownMenuOfSavedSearch.text = "Choose"
         dropDownMenuOfSavedSearch.isSearchEnable = true
         dropDownMenuOfSavedSearch.didSelect{(selectedText, index, id) in
@@ -56,7 +51,6 @@ class ViewController: UIViewController {
             self.offlineUpdate()
         }
         offlineUpdate()
-        //forecastTableView.reloadData()
     }
     
     private func offlineUpdate() {
@@ -66,10 +60,7 @@ class ViewController: UIViewController {
         //удалим устаревшие объекты
         let currentTimeStamp = getCurrentTimeStamp()
         let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
-        DataBase.shared.realm.beginWrite()
-        DataBase.shared.realm.delete(dayForecastToDelete)
-        //DataBase.shared.realm.deleteAll()
-        try! DataBase.shared.realm.commitWrite()
+        DataBase.shared.deleteDayForecast(dayForecastToDelete)
         
         //Загружаем список запросов из кеша
         let indexesForecast = DataBase.shared.realm.objects(IndexForecast.self)
@@ -82,6 +73,7 @@ class ViewController: UIViewController {
         dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray.reversed()
         
         //Выбор фильтрации: по городу или по последнему файлу
+        var predicate = NSPredicate()
         switch selectedCity.count {
         case 0:
             predicate = NSPredicate(format: "timeStamp == \(lastTimeStamp ?? 0)")
@@ -107,7 +99,6 @@ class ViewController: UIViewController {
                     currentWeatherDescLabel.isHidden = false
                     
                     currentWeatherDescLabel.text = "\(currentWeatherForecast.weather.first?.desc ?? "Error")"
-                    
                     weatherInCityLabel.text = "Weather in \(lastForecastFromCache.cityKey ?? "Error"):"
                 }
             }
@@ -115,7 +106,6 @@ class ViewController: UIViewController {
         isTableViewUpdateFromCache = true
         forecastTableView.reloadData()
         }
-        
         forecastNoticeLabel.isHidden = false
     }
     
@@ -139,10 +129,8 @@ class ViewController: UIViewController {
         getForecastButton.backgroundColor = .gray
         getForecastButton.setTitle("Updating...", for: .normal)
         getStatusFlag = false
-        
-        //FIXME: унести время интервала в сетап
 
-        Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(enableButton), userInfo: nil, repeats: false)
+        Timer.scheduledTimer(timeInterval: timeOutButtonInterval, target: self, selector: #selector(enableButton), userInfo: nil, repeats: false)
     
         //Если поле нажатия кнопки нет Интернета метод предупреждает пользователя об этом
         checkOfflineMode()
@@ -172,7 +160,6 @@ class ViewController: UIViewController {
                     [weak self](result: CurrentWeather?, error: Error?, statusCode: Int?) in
                         if let error = error {
                             print("\(error)")
-                            print("\(statusCode)")
                             self?.getStatusFlag = true
                             if let checkStatusCode = statusCode {
                                 self?.weatherInCityLabel.isHidden = false
@@ -202,7 +189,6 @@ class ViewController: UIViewController {
             weatherInCityLabel.isHidden = false
             weatherInCityLabel.text = "Check your internet connection"
         }
-        
     }
     
     private func checkOfflineMode(){
@@ -212,7 +198,6 @@ class ViewController: UIViewController {
         }
     }
 
-    
     private func updateForecast(from result: Forecast){
         forecast = result
         
@@ -239,9 +224,7 @@ class ViewController: UIViewController {
                         dayForecast.main?.id = UUID().uuidString
                     }
                 }
-                DataBase.shared.realm.beginWrite()
-                DataBase.shared.realm.add(savedObject, update: .all)
-                try! DataBase.shared.realm.commitWrite()
+                DataBase.shared.updateIndexForeCast(savedObject)
                 }
             }
         let convertForecastListArray = Array(forecast.list)
@@ -258,10 +241,12 @@ class ViewController: UIViewController {
     
     private func updateCurrentWeather(from result: CurrentWeather){
         currentWeather = result
+        
         weatherInCityLabel.isHidden = false
         weatherIconImageView.isHidden = false
-        weatherInCityLabel.text = "Weather in \(currentWeather.name ?? "Error"):"
+        currentTemperatureLabel.isHidden = false
         
+        weatherInCityLabel.text = "Weather in \(currentWeather.name ?? "Error"):"
         
         if let iconShortCut = currentWeather.weather.first?.icon {
             let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(iconShortCut)@2x.png")
@@ -276,13 +261,13 @@ class ViewController: UIViewController {
             }
         }
         
-        currentTemperatureLabel.isHidden = false
         if let currentTemperature = currentWeather.main?.temp.value {
             currentTemperatureLabel.text = "\(Int(currentTemperature)) °C"
         }
     }
     
 }
+
 //MARK: -UITableViewDataSource
 
 extension ViewController: UITableViewDataSource {
@@ -294,22 +279,23 @@ extension ViewController: UITableViewDataSource {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as! ForecastTableViewCell
         if let currentTemperature = daysForecast[indexPath.row].main?.temp.value {
-            cell.setTemperatureLabel("\(Int(currentTemperature)) °C")
+            cell.cellLabel.text = "\(Int(currentTemperature)) °C"
         }
         cell.setDateLabel(daysForecast[indexPath.row].dt_txt)
         
         //Какие данные подгружать в таблицу в зависимости от того из кеша загружается или с Инета
         if isTableViewUpdateFromCache == false {
             
-            cell.isHiddenWeatherDescCell(true)
-            cell.isHiddenForecastImageView(false)
+            cell.textWeatherDescLabel.isHidden = true
+            cell.forecastIconImageView.isHidden = false
             cell.setImage(daysForecast[indexPath.row].weather.first?.icon)
             
         } else {
-            cell.isHiddenWeatherDescCell(false)
-            cell.isHiddenForecastImageView(true)
-            cell.setWeatherDescLabel(daysForecast[indexPath.row].weather.first?.desc)
+            cell.textWeatherDescLabel.isHidden = false
+            cell.forecastIconImageView.isHidden = true
+            cell.textWeatherDescLabel.text = daysForecast[indexPath.row].weather.first?.desc
         }
         return cell
     }
 }
+
