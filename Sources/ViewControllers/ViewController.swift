@@ -12,10 +12,9 @@ import Alamofire
 import iOSDropDown
 
 class ViewController: UIViewController {
-    // выпадающий список чтобы сразу обновлялся
     // констрейнт задать высоту
     var forecast = Forecast()
-    var currentWeather = CurrentWeather()
+    var currentWeather = CurrentWeather(cod: 0, name: "")
     var daysForecast = [DayForecast]()
     var selectedCity = ""
     var cityOfSearchArray = [String]()
@@ -213,14 +212,6 @@ class ViewController: UIViewController {
         }
     }
 
-    
-    private func sendCurrentWeatherError(from result: CurrentWeatherError){
-        if let message = result.message {
-            weatherInCityLabel.isHidden = false
-            weatherInCityLabel.text = message + " try again"
-        }
-        
-    }
     
     private func updateForecast(from result: Forecast){
         forecast = result

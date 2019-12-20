@@ -23,8 +23,5 @@ var params: Parameters = [
     "units": "metric"
 ]
 
-let manager = Alamofire.SessionManager.default
-let timeoutIntervalAPI = 3.0   // интервал по времени запроса для API, сек
-
 let timeOutButtonInterval = 3  // интервал заморозки кнопки "Get Forecast"
 
