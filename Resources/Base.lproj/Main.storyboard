@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="cTc-sE-MZZ">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="cTc-sE-MZZ">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -50,10 +50,15 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="NuM-1I-w1c">
                                 <rect key="frame" x="0.0" y="281" width="375" height="386"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <view key="tableFooterView" contentMode="scaleToFill" id="xaE-6b-ajh">
+                                    <rect key="frame" x="0.0" y="107" width="375" height="44"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                </view>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" rowHeight="51" id="fwf-M4-en1" customClass="ForecastTableViewCell" customModule="WeatherApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="375" height="51"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="fwf-M4-en1" id="R5o-fI-e43">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="51"/>
                                             <autoresizingMask key="autoresizingMask"/>
@@ -80,8 +85,8 @@
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Data" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kyy-fq-3md">
-                                                    <rect key="frame" x="286.5" y="0.5" width="88.5" height="50"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Dec 30" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kyy-fq-3md">
+                                                    <rect key="frame" x="309.5" y="0.5" width="55.5" height="50"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="50" id="yFZ-RA-RDt"/>
                                                     </constraints>
@@ -93,12 +98,12 @@
                                             <constraints>
                                                 <constraint firstItem="4Ot-eN-nBf" firstAttribute="centerY" secondItem="5K4-Ut-aEu" secondAttribute="centerY" id="2pb-gN-LNV"/>
                                                 <constraint firstItem="nuM-he-dWs" firstAttribute="centerX" secondItem="R5o-fI-e43" secondAttribute="centerX" id="6lL-04-2Q7"/>
-                                                <constraint firstAttribute="trailing" secondItem="Kyy-fq-3md" secondAttribute="trailing" id="GVg-FN-Wjh"/>
+                                                <constraint firstAttribute="trailing" secondItem="Kyy-fq-3md" secondAttribute="trailing" constant="10" id="GVg-FN-Wjh"/>
                                                 <constraint firstItem="5K4-Ut-aEu" firstAttribute="centerY" secondItem="R5o-fI-e43" secondAttribute="centerY" id="LAO-Of-H7H"/>
-                                                <constraint firstItem="nuM-he-dWs" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="4Ot-eN-nBf" secondAttribute="trailing" id="Ubw-Sg-dG0"/>
                                                 <constraint firstItem="Kyy-fq-3md" firstAttribute="centerY" secondItem="R5o-fI-e43" secondAttribute="centerY" id="W0r-Dp-pQS"/>
                                                 <constraint firstItem="4Ot-eN-nBf" firstAttribute="leading" secondItem="5K4-Ut-aEu" secondAttribute="leading" id="ZW5-wq-wXV"/>
-                                                <constraint firstItem="Kyy-fq-3md" firstAttribute="leading" secondItem="nuM-he-dWs" secondAttribute="trailing" constant="50" id="jh8-SP-gBH"/>
+                                                <constraint firstItem="Kyy-fq-3md" firstAttribute="leading" secondItem="5K4-Ut-aEu" secondAttribute="trailing" constant="243.5" id="hVe-HL-igi"/>
+                                                <constraint firstItem="nuM-he-dWs" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="4Ot-eN-nBf" secondAttribute="trailing" constant="8" symbolic="YES" id="nhE-WR-LRN"/>
                                                 <constraint firstItem="5K4-Ut-aEu" firstAttribute="leading" secondItem="R5o-fI-e43" secondAttribute="leading" constant="16" id="vaS-E2-gSk"/>
                                                 <constraint firstItem="nuM-he-dWs" firstAttribute="centerY" secondItem="R5o-fI-e43" secondAttribute="centerY" id="waR-ea-lQY"/>
                                             </constraints>
@@ -165,11 +170,11 @@
                             <constraint firstItem="NuM-1I-w1c" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="PhU-4w-OJp"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="rWv-gp-hcm" secondAttribute="trailing" constant="10" id="QAG-qe-bI8"/>
                             <constraint firstItem="B60-mr-kgs" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="R5r-1o-Bp3"/>
+                            <constraint firstItem="BC0-GD-ou9" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="175" id="WLi-jv-SgO"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="vJ0-ls-mmh" secondAttribute="trailing" symbolic="YES" id="ZO7-Sh-dVN"/>
                             <constraint firstItem="B60-mr-kgs" firstAttribute="leading" secondItem="tT6-7T-sgv" secondAttribute="trailing" constant="10" id="Zao-68-Owj"/>
                             <constraint firstItem="tT6-7T-sgv" firstAttribute="centerY" secondItem="B60-mr-kgs" secondAttribute="centerY" id="aZR-qc-Fve"/>
                             <constraint firstItem="rWv-gp-hcm" firstAttribute="top" secondItem="vJ0-ls-mmh" secondAttribute="bottom" constant="8" id="aaF-KF-nrS"/>
-                            <constraint firstItem="BC0-GD-ou9" firstAttribute="leading" secondItem="vJ0-ls-mmh" secondAttribute="trailing" constant="26" id="aet-5S-aXh"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="NuM-1I-w1c" secondAttribute="trailing" id="bbc-hK-V7F"/>
                             <constraint firstItem="vJ0-ls-mmh" firstAttribute="leading" secondItem="zmR-rB-rQX" secondAttribute="leading" id="brc-SF-Xc4"/>
                             <constraint firstItem="R6y-GZ-L4H" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="d5F-dc-fgw"/>
@@ -192,6 +197,7 @@
                         <outlet property="dropDownMenuOfSavedSearch" destination="BC0-GD-ou9" id="Maf-dB-vft"/>
                         <outlet property="forecastNoticeLabel" destination="R6y-GZ-L4H" id="u6u-bg-0ng"/>
                         <outlet property="forecastTableView" destination="NuM-1I-w1c" id="QF0-h5-kEW"/>
+                        <outlet property="getForecastButton" destination="vJ0-ls-mmh" id="c6C-k2-JFn"/>
                         <outlet property="weatherIconImageView" destination="3Pb-Ba-Fgb" id="5fR-iX-A7o"/>
                         <outlet property="weatherInCityLabel" destination="rWv-gp-hcm" id="LZM-cT-eTe"/>
                     </connections>
