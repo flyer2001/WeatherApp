@@ -60,7 +60,7 @@ class ViewController: UIViewController {
         //удалим устаревшие объекты
         let currentTimeStamp = getCurrentTimeStamp()
         let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
-        DataBase.shared.deleteDayForecast(dayForecastToDelete)
+        DataBase.shared.delete(dayForecastToDelete)
         
         //Загружаем список запросов из кеша
         let indexesForecast = DataBase.shared.realm.objects(IndexForecast.self)

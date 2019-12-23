@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4AE84B6DA283854A2AF33765 /* Pods_weatherApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F024E1A329CDF19ECFB139D /* Pods_weatherApp.framework */; };
-		622A5D6223A01C9300FE4CBE /* APIServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 622A5D6123A01C9300FE4CBE /* APIServices.swift */; };
+		622A5D6223A01C9300FE4CBE /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 622A5D6123A01C9300FE4CBE /* APIService.swift */; };
 		622A5D6423A0257E00FE4CBE /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 622A5D6323A0257E00FE4CBE /* Forecast.swift */; };
 		622B37D3239EE5DF00A1E2BB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 622B37D2239EE5DF00A1E2BB /* AppDelegate.swift */; };
 		622B37D5239EE5DF00A1E2BB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 622B37D4239EE5DF00A1E2BB /* SceneDelegate.swift */; };
@@ -29,7 +29,7 @@
 
 /* Begin PBXFileReference section */
 		2F024E1A329CDF19ECFB139D /* Pods_weatherApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_weatherApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		622A5D6123A01C9300FE4CBE /* APIServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIServices.swift; sourceTree = "<group>"; };
+		622A5D6123A01C9300FE4CBE /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		622A5D6323A0257E00FE4CBE /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast.swift; sourceTree = "<group>"; };
 		622B37CF239EE5DF00A1E2BB /* WeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		622B37D2239EE5DF00A1E2BB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -87,7 +87,7 @@
 			children = (
 				622DEBE423B0E54D0084FBA1 /* ForecastModel */,
 				62B0B7C023ABADD500CA4B24 /* Setup.swift */,
-				622A5D6123A01C9300FE4CBE /* APIServices.swift */,
+				622A5D6123A01C9300FE4CBE /* APIService.swift */,
 				624FB35223A1236000DD9FD1 /* DataBase.swift */,
 				622DD30123ABF91D004513DE /* IndexForecastModel.swift */,
 				624FB35423A1383000DD9FD1 /* CurrentWeatherModel.swift */,
@@ -288,7 +288,7 @@
 				622DEBEE23B0E7010084FBA1 /* City.swift in Sources */,
 				622DEBEC23B0E6720084FBA1 /* Weather.swift in Sources */,
 				622DEBE823B0E5F70084FBA1 /* DayForecast.swift in Sources */,
-				622A5D6223A01C9300FE4CBE /* APIServices.swift in Sources */,
+				622A5D6223A01C9300FE4CBE /* APIService.swift in Sources */,
 				622A5D6423A0257E00FE4CBE /* Forecast.swift in Sources */,
 				624FB35323A1236000DD9FD1 /* DataBase.swift in Sources */,
 				62B0B7C123ABADD500CA4B24 /* Setup.swift in Sources */,

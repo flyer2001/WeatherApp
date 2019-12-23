@@ -64,14 +64,14 @@ class DataBase {
         return result
     }
     
-    func deleteDayForecast (_ data: Results<DayForecast>) {
+    func delete (_ data: Results<DayForecast>) {
         DataBase.shared.realm.beginWrite()
         DataBase.shared.realm.delete(data)
         //DataBase.shared.realm.deleteAll()
         try! DataBase.shared.realm.commitWrite()
     }
     
-    func updateIndexForeCast (_ data: IndexForecast) {
+    func updateIndexForeCast (_ data: Object) {
         DataBase.shared.realm.beginWrite()
         DataBase.shared.realm.add(data, update: .all)
         try! DataBase.shared.realm.commitWrite()
