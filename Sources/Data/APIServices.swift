@@ -9,9 +9,9 @@
 import Foundation
 import Alamofire
 
-final public class APIServices {
+final public class APIService {
     
-    public static let shared = APIServices()
+    public static let shared = APIService()
     
     let sessionManager = SessionManager.default
     

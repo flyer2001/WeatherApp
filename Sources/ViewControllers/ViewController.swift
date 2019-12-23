@@ -135,7 +135,7 @@ class ViewController: UIViewController {
         //Если поле нажатия кнопки нет Интернета метод предупреждает пользователя об этом
         checkOfflineMode()
         
-        if APIServices.shared.checkInternetConnection() == false {
+        if APIService.shared.checkInternetConnection() == false {
             print("NO INTERNET")
         } else {
             if let city = cityTextField.text {
@@ -143,7 +143,7 @@ class ViewController: UIViewController {
                 //Запрос прогноза на 5 дней
                 let cityNameWithoutSpaces = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
                 let forecastURL = domain+dataVersionMethod+forecastMethod+cityNameWithoutSpaces
-                APIServices.shared.getObject(domain: forecastURL, params: params){
+                APIService.shared.getObject(domain: forecastURL, params: params){
                     [weak self](result: Forecast?, error: Error?, statusCode: Int?) in
                         if let error = error {
                             print("\(error)")
@@ -156,7 +156,7 @@ class ViewController: UIViewController {
                 
                 //Запрос прогноза на текуий день
                 let currentWeatherURL = domain+dataVersionMethod+currentWeatherMethod+cityNameWithoutSpaces
-                APIServices.shared.getObject(domain: currentWeatherURL, params: params){
+                APIService.shared.getObject(domain: currentWeatherURL, params: params){
                     [weak self](result: CurrentWeather?, error: Error?, statusCode: Int?) in
                         if let error = error {
                             print("\(error)")
@@ -192,7 +192,7 @@ class ViewController: UIViewController {
     }
     
     private func checkOfflineMode(){
-        if APIServices.shared.checkInternetConnection() == false {
+        if APIService.shared.checkInternetConnection() == false {
             weatherInCityLabel.isHidden = false
             weatherInCityLabel.text = "Check your internet connection"
         }
@@ -249,16 +249,7 @@ class ViewController: UIViewController {
         weatherInCityLabel.text = "Weather in \(currentWeather.name ?? "Error"):"
         
         if let iconShortCut = currentWeather.weather.first?.icon {
-            let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(iconShortCut)@2x.png")
-            let queue = DispatchQueue.global(qos: .utility)
-            
-            queue.async{
-                DispatchQueue.main.async {
-                    if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
-                       self.weatherIconImageView.image = image
-                }
-                }
-            }
+            self.weatherIconImageView.loadWeatherIcon(from: iconShortCut)
         }
         
         if let currentTemperature = currentWeather.main?.temp.value {
@@ -298,4 +289,21 @@ extension ViewController: UITableViewDataSource {
         return cell
     }
 }
+
+//MARK: -UIIMageView
+
+extension UIImageView {
+    func loadWeatherIcon(from shortcut: String) {
+        let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(shortcut)@2x.png")
+        let queue = DispatchQueue.global(qos: .utility)
+        queue.async{
+            DispatchQueue.main.async {
+                if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
+                    self.image = image
+                }
+            }
+        }
+    }
+}
+
 
