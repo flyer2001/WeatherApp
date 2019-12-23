@@ -29,17 +29,10 @@ class ForecastTableViewCell: UITableViewCell {
     }
     
     func setImage(_ iconShorcut: String?) {
-        let queue = DispatchQueue.global(qos: .utility)
-        
-        queue.async{
-            if let shortCut = iconShorcut {
-                let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(shortCut)@2x.png")
-                DispatchQueue.main.async {
-                    if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
-                        self.forecastIconImageView.image = image
-                    }
-                }
-            }
+        if let shortCut = iconShorcut {
+            self.forecastIconImageView.loadWeatherIcon(from: shortCut)
         }
     }
+        
+    
 }

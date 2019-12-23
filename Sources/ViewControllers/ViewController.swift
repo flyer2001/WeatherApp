@@ -21,6 +21,7 @@ class ViewController: UIViewController {
     var isTableViewUpdateFromCache = true
     let cellIdentifier = "cell"
     var getStatusFlag = false
+    let timeOutButtonInterval = 3.0  // интервал заморозки кнопки "Get Forecast"
     
     @IBOutlet weak var getForecastButton: UIButton!
     @IBOutlet weak var cityTextField: UITextField!
@@ -59,11 +60,10 @@ class ViewController: UIViewController {
         
         //удалим устаревшие объекты
         let currentTimeStamp = getCurrentTimeStamp()
-        let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
-        DataBase.shared.deleteDayForecast(dayForecastToDelete)
+        DataBase.shared.deleteOldForecast(currentTimeStamp)
         
         //Загружаем список запросов из кеша
-        let indexesForecast = DataBase.shared.realm.objects(IndexForecast.self)
+        let indexesForecast = DataBase.shared.getDataFromDB(ofType: IndexForecast.self)
         let convertIndexToArray = Array(indexesForecast)
         let dateArray = convertIndexToArray.compactMap{$0.timeStamp.value}
         let lastTimeStamp = dateArray.max()
@@ -82,7 +82,7 @@ class ViewController: UIViewController {
         }
         
         //получаем объект из кеша и заполняем лейблы и данные для таблицы
-        if let lastCacheObjects = DataBase.shared.realm.objects(IndexForecast.self).filter(predicate).first {
+        if let lastCacheObjects = DataBase.shared.getDataFromDB(ofType: IndexForecast.self).filter(predicate).first {
             if let lastForecastFromCache = lastCacheObjects.forecast {
                 let convertForecastListArray = Array(lastForecastFromCache.list)
                 daysForecast = convertForecastListArray.filter{($0.dt_txt!.contains("12:00:00"))}
@@ -117,7 +117,6 @@ class ViewController: UIViewController {
         return timeStampUTC
     }
 
-    
     @IBAction func getForecastButton(_ sender: Any) {
         weatherInCityLabel.isHidden = true
         currentTemperatureLabel.isHidden = true
@@ -135,46 +134,37 @@ class ViewController: UIViewController {
         //Если поле нажатия кнопки нет Интернета метод предупреждает пользователя об этом
         checkOfflineMode()
         
-        if APIServices.shared.checkInternetConnection() == false {
+        if APIService.shared.checkInternetConnection() == false {
             print("NO INTERNET")
         } else {
             if let city = cityTextField.text {
-                
+        
                 //Запрос прогноза на 5 дней
-                let cityNameWithoutSpaces = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                let forecastURL = domain+dataVersionMethod+forecastMethod+cityNameWithoutSpaces
-                APIServices.shared.getObject(domain: forecastURL, params: params){
-                    [weak self](result: Forecast?, error: Error?, statusCode: Int?) in
-                        if let error = error {
-                            print("\(error)")
-                        } else if let result = result {
-                            //print("\(result)")
-                            self?.updateForecast(from: result)
-                            self?.getStatusFlag = true
-                        }
+                APIService.shared.getObject(city: city, method: .forecast){
+                    [weak self] (result: Swift.Result<Forecast, Error>) in
+                    do {
+                        let result = try result.get()
+                        self?.updateForecast(from: result)
+                        self?.getStatusFlag = true
+                    } catch (let error) {
+                        print("\(error)")
+                    }
                 }
                 
-                //Запрос прогноза на текуий день
-                let currentWeatherURL = domain+dataVersionMethod+currentWeatherMethod+cityNameWithoutSpaces
-                APIServices.shared.getObject(domain: currentWeatherURL, params: params){
-                    [weak self](result: CurrentWeather?, error: Error?, statusCode: Int?) in
-                        if let error = error {
-                            print("\(error)")
-                            self?.getStatusFlag = true
-                            if let checkStatusCode = statusCode {
-                                self?.weatherInCityLabel.isHidden = false
-                                switch checkStatusCode {
-                                    case 400:
-                                        self?.weatherInCityLabel.text = "Try again"
-                                    case 404:
-                                        self?.weatherInCityLabel.text = "City not found, try again"
-                                default:
-                                    self?.weatherInCityLabel.text = "Error"
+                //Запрос прогноза на текущий день
+                APIService.shared.getObject(city: city, method: .currentWeather){
+                    [weak self](result: Swift.Result<CurrentWeather, Error>) in
+                        do {
+                            let result = try result.get()
+                            self?.updateCurrentWeather(from: result)
+                        } catch (let error) {
+                            if let customError = error as? CustomError {
+                                if let message = customError.message {
+                                    self?.getStatusFlag = true
+                                    self?.weatherInCityLabel.isHidden = false
+                                    self?.weatherInCityLabel.text = message
                                 }
                             }
-                        } else if let result = result {
-                            //print("\(result)")
-                            self?.updateCurrentWeather(from: result)
                         }
                 }
             }
@@ -192,7 +182,7 @@ class ViewController: UIViewController {
     }
     
     private func checkOfflineMode(){
-        if APIServices.shared.checkInternetConnection() == false {
+        if APIService.shared.checkInternetConnection() == false {
             weatherInCityLabel.isHidden = false
             weatherInCityLabel.text = "Check your internet connection"
         }
@@ -210,13 +200,11 @@ class ViewController: UIViewController {
             cityOfSearchArray = cityOfSearchArray.filter{$0 != cityFromJSON}
             cityOfSearchArray.insert(cityFromJSON, at: 0)
             dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray
-            //dropDownMenuOfSavedSearch.reloadInputViews()
             
             savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast, timeStamp: RealmOptional(getCurrentTimeStamp()))
             savedObject.forecast?.cityKey = cityFromJSON
-            checkToUpdate = DataBase.shared.realm.objects(Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
+            checkToUpdate = DataBase.shared.getDataFromDB(ofType:Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
             
-            //выходим за пределы инкапсуляции и присваеваем primary key id
             if checkToUpdate.count == 0 {
                 if let dayForecastUpdate = savedObject.forecast?.list {
                     for dayForecast in dayForecastUpdate {
@@ -225,8 +213,8 @@ class ViewController: UIViewController {
                     }
                 }
                 DataBase.shared.updateIndexForeCast(savedObject)
-                }
             }
+        }
         let convertForecastListArray = Array(forecast.list)
         daysForecast = convertForecastListArray.filter{$0.dt_txt!.contains("12:00:00")}
         
@@ -249,16 +237,7 @@ class ViewController: UIViewController {
         weatherInCityLabel.text = "Weather in \(currentWeather.name ?? "Error"):"
         
         if let iconShortCut = currentWeather.weather.first?.icon {
-            let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(iconShortCut)@2x.png")
-            let queue = DispatchQueue.global(qos: .utility)
-            
-            queue.async{
-                DispatchQueue.main.async {
-                    if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
-                       self.weatherIconImageView.image = image
-                }
-                }
-            }
+            self.weatherIconImageView.loadWeatherIcon(from: iconShortCut)
         }
         
         if let currentTemperature = currentWeather.main?.temp.value {
@@ -298,4 +277,21 @@ extension ViewController: UITableViewDataSource {
         return cell
     }
 }
+
+//MARK: -UIIMageView
+
+extension UIImageView {
+    func loadWeatherIcon(from shortcut: String) {
+        let photoUrl = URL(string: "https://openweathermap.org/img/wn/\(shortcut)@2x.png")
+        let queue = DispatchQueue.global(qos: .utility)
+        queue.async{
+            DispatchQueue.main.async {
+                if let data = try? Data(contentsOf: photoUrl!), let image = UIImage(data: data) {
+                    self.image = image
+                }
+            }
+        }
+    }
+}
+
 
