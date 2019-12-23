@@ -63,8 +63,8 @@ class DataBase {
         
         return result
     }
+
     //CRUD операции
-    
     func getDataFromDB<T: Object> (ofType: T.Type) -> Results<T>{
         return DataBase.shared.realm.objects(T.self)
     }

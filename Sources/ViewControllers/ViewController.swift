@@ -21,6 +21,7 @@ class ViewController: UIViewController {
     var isTableViewUpdateFromCache = true
     let cellIdentifier = "cell"
     var getStatusFlag = false
+    let timeOutButtonInterval = 3.0  // интервал заморозки кнопки "Get Forecast"
     
     @IBOutlet weak var getForecastButton: UIButton!
     @IBOutlet weak var cityTextField: UITextField!
@@ -116,7 +117,6 @@ class ViewController: UIViewController {
         return timeStampUTC
     }
 
-    
     @IBAction func getForecastButton(_ sender: Any) {
         weatherInCityLabel.isHidden = true
         currentTemperatureLabel.isHidden = true
@@ -200,13 +200,11 @@ class ViewController: UIViewController {
             cityOfSearchArray = cityOfSearchArray.filter{$0 != cityFromJSON}
             cityOfSearchArray.insert(cityFromJSON, at: 0)
             dropDownMenuOfSavedSearch.optionArray = cityOfSearchArray
-            //dropDownMenuOfSavedSearch.reloadInputViews()
             
             savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast, timeStamp: RealmOptional(getCurrentTimeStamp()))
             savedObject.forecast?.cityKey = cityFromJSON
             checkToUpdate = DataBase.shared.getDataFromDB(ofType:Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
             
-            //выходим за пределы инкапсуляции и присваеваем primary key id
             if checkToUpdate.count == 0 {
                 if let dayForecastUpdate = savedObject.forecast?.list {
                     for dayForecast in dayForecastUpdate {
@@ -215,8 +213,8 @@ class ViewController: UIViewController {
                     }
                 }
                 DataBase.shared.updateIndexForeCast(savedObject)
-                }
             }
+        }
         let convertForecastListArray = Array(forecast.list)
         daysForecast = convertForecastListArray.filter{$0.dt_txt!.contains("12:00:00")}
         

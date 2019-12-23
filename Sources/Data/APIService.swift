@@ -52,7 +52,6 @@ final public class APIService {
         method: WeatherMethod,
         handler: @escaping (Swift.Result<T, Error>) -> Void) {
             params["q"] = city
-            print(params)
             let resultURL = domain + dataVersionMethod + method.path
             request(resultURL, method: .get, parameters: params).responseData(){ response in
                 response.result.withValue { data in

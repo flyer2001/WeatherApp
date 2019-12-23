@@ -24,7 +24,6 @@
 		624FB34B23A0E95B00DD9FD1 /* ForecastTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624FB34A23A0E95B00DD9FD1 /* ForecastTableViewCell.swift */; };
 		624FB35323A1236000DD9FD1 /* DataBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624FB35223A1236000DD9FD1 /* DataBase.swift */; };
 		624FB35523A1383000DD9FD1 /* CurrentWeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624FB35423A1383000DD9FD1 /* CurrentWeatherModel.swift */; };
-		62B0B7C123ABADD500CA4B24 /* Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B0B7C023ABADD500CA4B24 /* Setup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,7 +46,6 @@
 		624FB34A23A0E95B00DD9FD1 /* ForecastTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastTableViewCell.swift; sourceTree = "<group>"; };
 		624FB35223A1236000DD9FD1 /* DataBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBase.swift; sourceTree = "<group>"; };
 		624FB35423A1383000DD9FD1 /* CurrentWeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentWeatherModel.swift; sourceTree = "<group>"; };
-		62B0B7C023ABADD500CA4B24 /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Setup.swift; path = Sources/ViewControllers/Setup.swift; sourceTree = SOURCE_ROOT; };
 		6D76B8E589B89C8511E73ED2 /* Pods-weatherApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-weatherApp.release.xcconfig"; path = "Target Support Files/Pods-weatherApp/Pods-weatherApp.release.xcconfig"; sourceTree = "<group>"; };
 		744FDEE12584850D33F75264 /* Pods-weatherApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-weatherApp.debug.xcconfig"; path = "Target Support Files/Pods-weatherApp/Pods-weatherApp.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -86,7 +84,6 @@
 			isa = PBXGroup;
 			children = (
 				622DEBE423B0E54D0084FBA1 /* ForecastModel */,
-				62B0B7C023ABADD500CA4B24 /* Setup.swift */,
 				622A5D6123A01C9300FE4CBE /* APIService.swift */,
 				624FB35223A1236000DD9FD1 /* DataBase.swift */,
 				622DD30123ABF91D004513DE /* IndexForecastModel.swift */,
@@ -291,7 +288,6 @@
 				622A5D6223A01C9300FE4CBE /* APIService.swift in Sources */,
 				622A5D6423A0257E00FE4CBE /* Forecast.swift in Sources */,
 				624FB35323A1236000DD9FD1 /* DataBase.swift in Sources */,
-				62B0B7C123ABADD500CA4B24 /* Setup.swift in Sources */,
 				622B37D5239EE5DF00A1E2BB /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
