@@ -142,39 +142,31 @@ class ViewController: UIViewController {
                 
                 //Запрос прогноза на 5 дней
                 let cityNameWithoutSpaces = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                let forecastURL = domain+dataVersionMethod+forecastMethod+cityNameWithoutSpaces
-                APIService.shared.getObject(domain: forecastURL, params: params){
-                    [weak self](result: Forecast?, error: Error?, statusCode: Int?) in
-                        if let error = error {
-                            print("\(error)")
-                        } else if let result = result {
-                            //print("\(result)")
-                            self?.updateForecast(from: result)
-                            self?.getStatusFlag = true
-                        }
+                APIService.shared.getObject(city: cityNameWithoutSpaces, method: .forecast){
+                    [weak self] (result: Swift.Result<Forecast, Error>) in
+                    do {
+                        let result = try result.get()
+                        self?.updateForecast(from: result)
+                        self?.getStatusFlag = true
+                    } catch (let error) {
+                        print("\(error)")
+                    }
                 }
                 
-                //Запрос прогноза на текуий день
-                let currentWeatherURL = domain+dataVersionMethod+currentWeatherMethod+cityNameWithoutSpaces
-                APIService.shared.getObject(domain: currentWeatherURL, params: params){
-                    [weak self](result: CurrentWeather?, error: Error?, statusCode: Int?) in
-                        if let error = error {
-                            print("\(error)")
-                            self?.getStatusFlag = true
-                            if let checkStatusCode = statusCode {
-                                self?.weatherInCityLabel.isHidden = false
-                                switch checkStatusCode {
-                                    case 400:
-                                        self?.weatherInCityLabel.text = "Try again"
-                                    case 404:
-                                        self?.weatherInCityLabel.text = "City not found, try again"
-                                default:
-                                    self?.weatherInCityLabel.text = "Error"
+                //Запрос прогноза на текущий день
+                APIService.shared.getObject(city: cityNameWithoutSpaces, method: .currentWeather){
+                    [weak self](result: Swift.Result<CurrentWeather, Error>) in
+                        do {
+                            let result = try result.get()
+                            self?.updateCurrentWeather(from: result)
+                        } catch (let error) {
+                            if let customError = error as? CustomError {
+                                if let message = customError.message {
+                                    self?.getStatusFlag = true
+                                    self?.weatherInCityLabel.isHidden = false
+                                    self?.weatherInCityLabel.text = message
                                 }
                             }
-                        } else if let result = result {
-                            //print("\(result)")
-                            self?.updateCurrentWeather(from: result)
                         }
                 }
             }
