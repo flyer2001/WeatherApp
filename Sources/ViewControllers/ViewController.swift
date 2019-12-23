@@ -59,11 +59,10 @@ class ViewController: UIViewController {
         
         //удалим устаревшие объекты
         let currentTimeStamp = getCurrentTimeStamp()
-        let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(currentTimeStamp)")
-        DataBase.shared.delete(dayForecastToDelete)
+        DataBase.shared.deleteOldForecast(currentTimeStamp)
         
         //Загружаем список запросов из кеша
-        let indexesForecast = DataBase.shared.realm.objects(IndexForecast.self)
+        let indexesForecast = DataBase.shared.getDataFromDB(ofType: IndexForecast.self)
         let convertIndexToArray = Array(indexesForecast)
         let dateArray = convertIndexToArray.compactMap{$0.timeStamp.value}
         let lastTimeStamp = dateArray.max()
@@ -82,7 +81,7 @@ class ViewController: UIViewController {
         }
         
         //получаем объект из кеша и заполняем лейблы и данные для таблицы
-        if let lastCacheObjects = DataBase.shared.realm.objects(IndexForecast.self).filter(predicate).first {
+        if let lastCacheObjects = DataBase.shared.getDataFromDB(ofType: IndexForecast.self).filter(predicate).first {
             if let lastForecastFromCache = lastCacheObjects.forecast {
                 let convertForecastListArray = Array(lastForecastFromCache.list)
                 daysForecast = convertForecastListArray.filter{($0.dt_txt!.contains("12:00:00"))}
@@ -139,10 +138,9 @@ class ViewController: UIViewController {
             print("NO INTERNET")
         } else {
             if let city = cityTextField.text {
-                
+        
                 //Запрос прогноза на 5 дней
-                let cityNameWithoutSpaces = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                APIService.shared.getObject(city: cityNameWithoutSpaces, method: .forecast){
+                APIService.shared.getObject(city: city, method: .forecast){
                     [weak self] (result: Swift.Result<Forecast, Error>) in
                     do {
                         let result = try result.get()
@@ -154,7 +152,7 @@ class ViewController: UIViewController {
                 }
                 
                 //Запрос прогноза на текущий день
-                APIService.shared.getObject(city: cityNameWithoutSpaces, method: .currentWeather){
+                APIService.shared.getObject(city: city, method: .currentWeather){
                     [weak self](result: Swift.Result<CurrentWeather, Error>) in
                         do {
                             let result = try result.get()
@@ -206,7 +204,7 @@ class ViewController: UIViewController {
             
             savedObject = IndexForecast(cityKey: cityFromJSON, forecast: forecast, timeStamp: RealmOptional(getCurrentTimeStamp()))
             savedObject.forecast?.cityKey = cityFromJSON
-            checkToUpdate = DataBase.shared.realm.objects(Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
+            checkToUpdate = DataBase.shared.getDataFromDB(ofType:Forecast.self).filter("cityKey CONTAINS[c] '\(cityFromJSON)'")
             
             //выходим за пределы инкапсуляции и присваеваем primary key id
             if checkToUpdate.count == 0 {
