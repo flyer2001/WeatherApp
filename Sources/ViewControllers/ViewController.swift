@@ -75,7 +75,8 @@ class ViewController: UIViewController {
         
         //удалим устаревшие объекты
         let currentTimeStamp = getCurrentTimeStamp()
-        DataBase.shared.deleteOldForecast(currentTimeStamp)
+        let filterForOldForecast = "dt < \(currentTimeStamp)"
+        DataBase.shared.delete(DayForecast.self, filter: filterForOldForecast)
         
         //Загружаем список запросов из кеша
         let indexesForecast = DataBase.shared.getDataFromDB(ofType: IndexForecast.self)
@@ -170,7 +171,6 @@ class ViewController: UIViewController {
                 
                 //Запрос прогноза на текущий день
                 let currentWeatherURL = URL(string: domain)?.appendingPathComponent(dataVersionMethod).appendingPathComponent(WeatherMethod.current.rawValue)
-                print(currentWeatherURL)
                 APIService.shared.getObject(url: currentWeatherURL, params: params){
                     [weak self](result: Swift.Result<CurrentWeather, Error>) in
                         do {
@@ -231,7 +231,7 @@ class ViewController: UIViewController {
                         dayForecast.main?.id = UUID().uuidString
                     }
                 }
-                DataBase.shared.updateIndexForeCast(savedObject)
+                DataBase.shared.update(savedObject)
             }
         }
         let convertForecastListArray = Array(forecast.list)

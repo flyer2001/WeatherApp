@@ -68,15 +68,15 @@ class DataBase {
     func getDataFromDB<T: Object> (ofType: T.Type) -> Results<T>{
         return DataBase.shared.realm.objects(T.self)
     }
-    
-    func deleteOldForecast(_ timeStamp: Int) {
-        let dayForecastToDelete = DataBase.shared.realm.objects(DayForecast.self).filter("dt < \(timeStamp)")
+
+    func delete<T: Object>(_ data: T.Type, filter: String) {
+        let dayForecastToDelete = DataBase.shared.realm.objects(T.self).filter(filter)
         DataBase.shared.realm.beginWrite()
         DataBase.shared.realm.delete(dayForecastToDelete)
         try! DataBase.shared.realm.commitWrite()
     }
     
-    func updateIndexForeCast (_ data: Object) {
+    func update(_ data: Object) {
         DataBase.shared.realm.beginWrite()
         DataBase.shared.realm.add(data, update: .all)
         try! DataBase.shared.realm.commitWrite()
