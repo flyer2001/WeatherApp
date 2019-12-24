@@ -11,6 +11,21 @@ import RealmSwift
 import Alamofire
 import iOSDropDown
 
+let domain = "https://api.openweathermap.org"
+let dataVersionMethod = "/data/2.5"
+
+var params: Parameters = [
+    "q": "",
+    "mode": "JSON",
+    "APPID": "c21154f65ac934ec1c3af7b754337205",
+    "units": "metric"
+]
+
+enum WeatherMethod: String {
+    case current = "weather"
+    case forecast = "forecast"
+}
+
 class ViewController: UIViewController {
 
     var forecast = Forecast()
@@ -140,7 +155,9 @@ class ViewController: UIViewController {
             if let city = cityTextField.text {
         
                 //Запрос прогноза на 5 дней
-                APIService.shared.getObject(city: city, method: .forecast){
+                let forecastURL = URL(string: domain)?.appendingPathComponent(dataVersionMethod).appendingPathComponent(WeatherMethod.forecast.rawValue)
+                params["q"] = city
+                APIService.shared.getObject(url: forecastURL, params: params){
                     [weak self] (result: Swift.Result<Forecast, Error>) in
                     do {
                         let result = try result.get()
@@ -152,7 +169,9 @@ class ViewController: UIViewController {
                 }
                 
                 //Запрос прогноза на текущий день
-                APIService.shared.getObject(city: city, method: .currentWeather){
+                let currentWeatherURL = URL(string: domain)?.appendingPathComponent(dataVersionMethod).appendingPathComponent(WeatherMethod.current.rawValue)
+                print(currentWeatherURL)
+                APIService.shared.getObject(url: currentWeatherURL, params: params){
                     [weak self](result: Swift.Result<CurrentWeather, Error>) in
                         do {
                             let result = try result.get()
